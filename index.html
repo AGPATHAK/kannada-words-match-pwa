@@ -115,15 +115,28 @@
       }
 
       .tile {
+        position: relative;
+        overflow: hidden;
         padding: 16px;
         border-radius: 18px;
         border: 1px solid var(--border);
         background: var(--panel-strong);
       }
 
-      .tile.placeholder {
-        border-style: dashed;
-        background: linear-gradient(180deg, #fffdfa 0%, #faf3e8 100%);
+      .tile::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(157, 92, 47, 0.05), transparent 45%);
+        pointer-events: none;
+      }
+
+      .tile.kannada-tile {
+        background: linear-gradient(180deg, #fffdfa 0%, #faf2e4 100%);
+      }
+
+      .tile.english-tile {
+        background: linear-gradient(180deg, #fffdfb 0%, #f7efe5 100%);
       }
 
       .tile-label {
@@ -232,12 +245,13 @@
   <body>
     <main class="app">
       <section class="hero" aria-label="App introduction">
-        <p class="eyebrow">Starter Shell</p>
+        <p class="eyebrow">Round Preview</p>
         <h1>Kannada Words Match</h1>
         <p class="subtitle">
           Match beginner-friendly Kannada words with their English meanings.
-          This first issue sets up the single-file app shell, starter dataset,
-          and placeholder layout for the gameplay screen.
+          This round renders 5 random Kannada-English pairs from the embedded
+          starter dataset, with Kannada kept stable and English meanings
+          shuffled separately.
         </p>
       </section>
 
@@ -254,7 +268,7 @@
           <section class="column" aria-labelledby="english-column-title">
             <div class="column-header">
               <h2 id="english-column-title">English</h2>
-              <span>Placeholder meanings column</span>
+              <span>Meanings shuffled independently</span>
             </div>
             <div id="english-list" class="tile-list" aria-live="polite"></div>
           </section>
@@ -267,9 +281,9 @@
           <span id="dataset-count" aria-live="polite"></span>
         </div>
         <p class="controls-copy">
-          Round generation, matching, feedback states, and replay behavior are
-          intentionally not implemented yet. These buttons are visual
-          placeholders for the next issue.
+          This issue renders one round only. Tap-to-pair interaction, match
+          validation, feedback states, and replay behavior are still intentionally
+          deferred.
         </p>
         <div class="button-row">
           <button type="button" disabled>Start Round</button>
@@ -278,8 +292,8 @@
         <div class="status" role="status" aria-live="polite">
           <h2>Current Status</h2>
           <p id="status-message">
-            App shell ready. Starter dataset embedded. Interaction logic coming
-            next.
+            One round is rendered from the embedded dataset. Matching logic is
+            not active yet.
           </p>
         </div>
       </section>
@@ -313,11 +327,41 @@
         { id: "kivi", kannada: "ಕಿವಿ", devanagari: "किवि", english: "ear" }
       ];
 
-      const PREVIEW_COUNT = 5;
+      const ROUND_SIZE = 5;
+
+      function shuffleArray(items) {
+        const copy = [...items];
+
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          const current = copy[index];
+          copy[index] = copy[swapIndex];
+          copy[swapIndex] = current;
+        }
+
+        return copy;
+      }
+
+      function createRound(dataset, roundSize) {
+        const kannadaPairs = shuffleArray(dataset).slice(0, roundSize);
+        let englishPairs = shuffleArray(kannadaPairs);
+
+        // Keep Kannada stable and ensure English is not rendered in the exact same order.
+        while (
+          roundSize > 1 &&
+          englishPairs.every((pair, index) => pair.id === kannadaPairs[index].id)
+        ) {
+          englishPairs = shuffleArray(kannadaPairs);
+        }
+
+        return { kannadaPairs, englishPairs };
+      }
 
       function createTile(content) {
         const article = document.createElement("article");
-        article.className = "tile placeholder";
+        article.className = "tile " + content.variant;
+        article.dataset.pairId = content.pairId;
+        article.dataset.tileType = content.tileType;
 
         const label = document.createElement("p");
         label.className = "tile-label";
@@ -339,35 +383,54 @@
         return article;
       }
 
-      function renderShellPreview() {
+      function renderRound(roundState) {
         const kannadaList = document.getElementById("kannada-list");
         const englishList = document.getElementById("english-list");
         const datasetCount = document.getElementById("dataset-count");
+        const statusMessage = document.getElementById("status-message");
 
-        const previewItems = STARTER_DATASET.slice(0, PREVIEW_COUNT);
+        kannadaList.textContent = "";
+        englishList.textContent = "";
 
-        previewItems.forEach((item, index) => {
+        // Kannada tiles stay in the selected round order for future matching logic.
+        roundState.kannadaPairs.forEach((item) => {
           kannadaList.appendChild(
             createTile({
+              pairId: item.id,
+              tileType: "kannada",
+              variant: "kannada-tile",
               label: item.kannada,
               support: item.devanagari,
-              meta: "Placeholder " + (index + 1)
-            })
-          );
-
-          englishList.appendChild(
-            createTile({
-              label: item.english,
-              support: "Matching behavior not enabled yet",
-              meta: "Placeholder " + (index + 1)
+              meta: "Pair ID: " + item.id
             })
           );
         });
 
-        datasetCount.textContent = STARTER_DATASET.length + " words embedded";
+        // English meaning tiles use the same pair IDs, but a separately shuffled order.
+        roundState.englishPairs.forEach((item, index) => {
+          englishList.appendChild(
+            createTile({
+              pairId: item.id,
+              tileType: "english",
+              variant: "english-tile",
+              label: item.english,
+              support: "Meaning tile " + (index + 1),
+              meta: "Pair ID: " + item.id
+            })
+          );
+        });
+
+        datasetCount.textContent =
+          ROUND_SIZE + " of " + STARTER_DATASET.length + " words in this round";
+        statusMessage.textContent =
+          "Round rendered with " +
+          roundState.kannadaPairs.length +
+          " unique pairs and separately shuffled English meanings.";
       }
 
-      renderShellPreview();
+      // Keep the rendered round in memory so later issues can add interaction cleanly.
+      const currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
+      renderRound(currentRound);
     </script>
   </body>
 </html>
