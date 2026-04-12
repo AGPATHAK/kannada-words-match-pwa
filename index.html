@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kannada Words Match</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5efe4;
+        --panel: rgba(255, 252, 246, 0.9);
+        --panel-strong: #fffdf9;
+        --border: #dbcdb3;
+        --border-strong: #bfa46f;
+        --text: #2b2116;
+        --muted: #6f604c;
+        --accent: #9d5c2f;
+        --accent-soft: #f2dfc9;
+        --shadow: 0 18px 50px rgba(90, 63, 28, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.75), transparent 35%),
+          linear-gradient(180deg, #f8f2e8 0%, var(--bg) 55%, #efe4d1 100%);
+        color: var(--text);
+      }
+
+      .app {
+        width: min(100%, 960px);
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+
+      .hero,
+      .board,
+      .controls {
+        background: var(--panel);
+        border: 1px solid rgba(191, 164, 111, 0.35);
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(8px);
+      }
+
+      .hero {
+        padding: 28px 22px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        line-height: 1;
+      }
+
+      .subtitle {
+        margin: 14px 0 0;
+        max-width: 42rem;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+
+      .board {
+        margin-top: 18px;
+        padding: 20px;
+      }
+
+      .board-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .column {
+        min-width: 0;
+      }
+
+      .column-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .column-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .column-header span {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .tile-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .tile {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: var(--panel-strong);
+      }
+
+      .tile.placeholder {
+        border-style: dashed;
+        background: linear-gradient(180deg, #fffdfa 0%, #faf3e8 100%);
+      }
+
+      .tile-label {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+      }
+
+      .tile-support {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .tile-meta {
+        margin: 10px 0 0;
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .controls {
+        margin-top: 18px;
+        padding: 20px;
+      }
+
+      .controls-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+
+      .controls h2,
+      .status h2 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+
+      .controls-copy {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      button {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font: inherit;
+        font-weight: 700;
+        color: #fffaf2;
+        background: var(--accent);
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .button-secondary {
+        color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .status {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: rgba(255, 250, 242, 0.9);
+      }
+
+      .status p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .footer-note {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      @media (min-width: 760px) {
+        .app {
+          padding: 40px 24px 56px;
+        }
+
+        .board-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="hero" aria-label="App introduction">
+        <p class="eyebrow">Starter Shell</p>
+        <h1>Kannada Words Match</h1>
+        <p class="subtitle">
+          Match beginner-friendly Kannada words with their English meanings.
+          This first issue sets up the single-file app shell, starter dataset,
+          and placeholder layout for the gameplay screen.
+        </p>
+      </section>
+
+      <section class="board" aria-label="Word matching board">
+        <div class="board-grid">
+          <section class="column" aria-labelledby="kannada-column-title">
+            <div class="column-header">
+              <h2 id="kannada-column-title">Kannada</h2>
+              <span>Script with Devanagari support</span>
+            </div>
+            <div id="kannada-list" class="tile-list" aria-live="polite"></div>
+          </section>
+
+          <section class="column" aria-labelledby="english-column-title">
+            <div class="column-header">
+              <h2 id="english-column-title">English</h2>
+              <span>Placeholder meanings column</span>
+            </div>
+            <div id="english-list" class="tile-list" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Controls and status">
+        <div class="controls-header">
+          <h2>Control Area</h2>
+          <span id="dataset-count" aria-live="polite"></span>
+        </div>
+        <p class="controls-copy">
+          Round generation, matching, feedback states, and replay behavior are
+          intentionally not implemented yet. These buttons are visual
+          placeholders for the next issue.
+        </p>
+        <div class="button-row">
+          <button type="button" disabled>Start Round</button>
+          <button type="button" class="button-secondary" disabled>Replay</button>
+        </div>
+        <div class="status" role="status" aria-live="polite">
+          <h2>Current Status</h2>
+          <p id="status-message">
+            App shell ready. Starter dataset embedded. Interaction logic coming
+            next.
+          </p>
+        </div>
+      </section>
+
+      <p class="footer-note">
+        Single-file prototype with embedded CSS, JavaScript, and starter data.
+      </p>
+    </main>
+
+    <script>
+      const STARTER_DATASET = [
+        { id: "mane", kannada: "ಮನೆ", devanagari: "मने", english: "house" },
+        { id: "neeru", kannada: "ನೀರು", devanagari: "नीरु", english: "water" },
+        { id: "pustaka", kannada: "ಪುಸ್ತಕ", devanagari: "पुस्तक", english: "book" },
+        { id: "shaale", kannada: "ಶಾಲೆ", devanagari: "शाळे", english: "school" },
+        { id: "hoovu", kannada: "ಹೂವು", devanagari: "हूवु", english: "flower" },
+        { id: "hannu", kannada: "ಹಣ್ಣು", devanagari: "हण्णु", english: "fruit" },
+        { id: "oota", kannada: "ಊಟ", devanagari: "ऊट", english: "food" },
+        { id: "surya", kannada: "ಸೂರ್ಯ", devanagari: "सूर्य", english: "sun" },
+        { id: "chandra", kannada: "ಚಂದ್ರ", devanagari: "चंद्र", english: "moon" },
+        { id: "magu", kannada: "ಮಗು", devanagari: "मगु", english: "child" },
+        { id: "haalu", kannada: "ಹಾಲು", devanagari: "हालु", english: "milk" },
+        { id: "baagilu", kannada: "ಬಾಗಿಲು", devanagari: "बागिलु", english: "door" },
+        { id: "kitaki", kannada: "ಕಿಟಕಿ", devanagari: "किटकि", english: "window" },
+        { id: "raste", kannada: "ರಸ್ತೆ", devanagari: "रस्ते", english: "road" },
+        { id: "bekku", kannada: "ಬೆಕ್ಕು", devanagari: "बेक्कु", english: "cat" },
+        { id: "naayi", kannada: "ನಾಯಿ", devanagari: "नायी", english: "dog" },
+        { id: "mara", kannada: "ಮರ", devanagari: "मर", english: "tree" },
+        { id: "kai", kannada: "ಕೈ", devanagari: "कै", english: "hand" },
+        { id: "kannu", kannada: "ಕಣ್ಣು", devanagari: "कण्णु", english: "eye" },
+        { id: "kivi", kannada: "ಕಿವಿ", devanagari: "किवि", english: "ear" }
+      ];
+
+      const PREVIEW_COUNT = 5;
+
+      function createTile(content) {
+        const article = document.createElement("article");
+        article.className = "tile placeholder";
+
+        const label = document.createElement("p");
+        label.className = "tile-label";
+        label.textContent = content.label;
+        article.appendChild(label);
+
+        if (content.support) {
+          const support = document.createElement("p");
+          support.className = "tile-support";
+          support.textContent = content.support;
+          article.appendChild(support);
+        }
+
+        const meta = document.createElement("p");
+        meta.className = "tile-meta";
+        meta.textContent = content.meta;
+        article.appendChild(meta);
+
+        return article;
+      }
+
+      function renderShellPreview() {
+        const kannadaList = document.getElementById("kannada-list");
+        const englishList = document.getElementById("english-list");
+        const datasetCount = document.getElementById("dataset-count");
+
+        const previewItems = STARTER_DATASET.slice(0, PREVIEW_COUNT);
+
+        previewItems.forEach((item, index) => {
+          kannadaList.appendChild(
+            createTile({
+              label: item.kannada,
+              support: item.devanagari,
+              meta: "Placeholder " + (index + 1)
+            })
+          );
+
+          englishList.appendChild(
+            createTile({
+              label: item.english,
+              support: "Matching behavior not enabled yet",
+              meta: "Placeholder " + (index + 1)
+            })
+          );
+        });
+
+        datasetCount.textContent = STARTER_DATASET.length + " words embedded";
+      }
+
+      renderShellPreview();
+    </script>
+  </body>
+</html>
