@@ -16,6 +16,14 @@
         --muted: #6f604c;
         --accent: #9d5c2f;
         --accent-soft: #f2dfc9;
+        --selected: #f3cf9d;
+        --selected-shadow: rgba(157, 92, 47, 0.24);
+        --matched-bg: #dff3df;
+        --matched-border: #67956b;
+        --matched-text: #214526;
+        --error-bg: #fbe0dc;
+        --error-border: #bf5f4e;
+        --error-text: #7d2e21;
         --shadow: 0 18px 50px rgba(90, 63, 28, 0.12);
       }
 
@@ -121,6 +129,17 @@
         border-radius: 18px;
         border: 1px solid var(--border);
         background: var(--panel-strong);
+        cursor: pointer;
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          box-shadow 160ms ease,
+          background 160ms ease,
+          opacity 160ms ease;
+      }
+
+      .tile:hover {
+        transform: translateY(-1px);
       }
 
       .tile::after {
@@ -137,6 +156,38 @@
 
       .tile.english-tile {
         background: linear-gradient(180deg, #fffdfb 0%, #f7efe5 100%);
+      }
+
+      .tile.selected {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--selected-shadow);
+        background: linear-gradient(180deg, #fff5e8 0%, #f9e6ca 100%);
+      }
+
+      .tile.incorrect {
+        border-color: var(--error-border);
+        box-shadow: 0 0 0 4px rgba(191, 95, 78, 0.18);
+        background: linear-gradient(180deg, var(--error-bg) 0%, #f8d4ce 100%);
+        color: var(--error-text);
+      }
+
+      .tile.matched {
+        border-color: var(--matched-border);
+        background: linear-gradient(180deg, var(--matched-bg) 0%, #cfeccc 100%);
+        color: var(--matched-text);
+        box-shadow: 0 0 0 4px rgba(103, 149, 107, 0.14);
+      }
+
+      .tile.matched::after {
+        background: linear-gradient(135deg, rgba(53, 123, 66, 0.1), transparent 50%);
+      }
+
+      .tile.disabled {
+        cursor: default;
+      }
+
+      .tile.disabled:hover {
+        transform: none;
       }
 
       .tile-label {
@@ -281,9 +332,8 @@
           <span id="dataset-count" aria-live="polite"></span>
         </div>
         <p class="controls-copy">
-          This issue renders one round only. Tap-to-pair interaction, match
-          validation, feedback states, and replay behavior are still intentionally
-          deferred.
+          Select one Kannada tile and one English tile to test a pair. Replay
+          and new-round controls still stay inactive in this issue.
         </p>
         <div class="button-row">
           <button type="button" disabled>Start Round</button>
@@ -328,6 +378,7 @@
       ];
 
       const ROUND_SIZE = 5;
+      const INCORRECT_RESET_DELAY_MS = 800;
 
       function shuffleArray(items) {
         const copy = [...items];
@@ -362,6 +413,9 @@
         article.className = "tile " + content.variant;
         article.dataset.pairId = content.pairId;
         article.dataset.tileType = content.tileType;
+        article.setAttribute("role", "button");
+        article.setAttribute("tabindex", content.disabled ? "-1" : "0");
+        article.setAttribute("aria-disabled", content.disabled ? "true" : "false");
 
         const label = document.createElement("p");
         label.className = "tile-label";
@@ -380,7 +434,72 @@
         meta.textContent = content.meta;
         article.appendChild(meta);
 
+        if (content.stateClasses.length > 0) {
+          article.classList.add(...content.stateClasses);
+        }
+
         return article;
+      }
+
+      function getTileStateClasses(tileType, pairId) {
+        const stateClasses = [];
+        const isSelected =
+          (tileType === "kannada" && uiState.selectedKannadaId === pairId) ||
+          (tileType === "english" && uiState.selectedEnglishId === pairId);
+
+        if (uiState.matchedPairIds.has(pairId)) {
+          stateClasses.push("matched", "disabled");
+        } else if (uiState.incorrectPairIds.has(pairId)) {
+          stateClasses.push("incorrect");
+        } else if (isSelected) {
+          stateClasses.push("selected");
+        }
+
+        return stateClasses;
+      }
+
+      function getStatusMessage() {
+        if (uiState.isFeedbackLocked) {
+          return "Not a match. Try again in a moment.";
+        }
+
+        if (uiState.selectedKannadaId && uiState.selectedEnglishId) {
+          return "Checking the selected pair.";
+        }
+
+        if (uiState.selectedKannadaId) {
+          return "Kannada selected. Now choose the matching English meaning.";
+        }
+
+        if (uiState.selectedEnglishId) {
+          return "English selected. Now choose the matching Kannada word.";
+        }
+
+        return "Tap one Kannada tile and one English tile to make a match.";
+      }
+
+      function getKannadaTileMeta(pairId) {
+        if (uiState.matchedPairIds.has(pairId)) {
+          return "Matched";
+        }
+
+        if (uiState.selectedKannadaId === pairId) {
+          return "Selected";
+        }
+
+        return "Tap to select";
+      }
+
+      function getEnglishTileMeta(pairId) {
+        if (uiState.matchedPairIds.has(pairId)) {
+          return "Matched";
+        }
+
+        if (uiState.selectedEnglishId === pairId) {
+          return "Selected";
+        }
+
+        return "Tap to select";
       }
 
       function renderRound(roundState) {
@@ -399,9 +518,11 @@
               pairId: item.id,
               tileType: "kannada",
               variant: "kannada-tile",
+              disabled: uiState.matchedPairIds.has(item.id),
+              stateClasses: getTileStateClasses("kannada", item.id),
               label: item.kannada,
               support: item.devanagari,
-              meta: "Pair ID: " + item.id
+              meta: getKannadaTileMeta(item.id)
             })
           );
         });
@@ -413,23 +534,107 @@
               pairId: item.id,
               tileType: "english",
               variant: "english-tile",
+              disabled: uiState.matchedPairIds.has(item.id),
+              stateClasses: getTileStateClasses("english", item.id),
               label: item.english,
-              support: "Meaning tile " + (index + 1),
-              meta: "Pair ID: " + item.id
+              support: "Meaning " + (index + 1),
+              meta: getEnglishTileMeta(item.id)
             })
           );
         });
 
         datasetCount.textContent =
           ROUND_SIZE + " of " + STARTER_DATASET.length + " words in this round";
-        statusMessage.textContent =
-          "Round rendered with " +
-          roundState.kannadaPairs.length +
-          " unique pairs and separately shuffled English meanings.";
+        statusMessage.textContent = getStatusMessage();
+      }
+
+      function clearSelections() {
+        uiState.selectedKannadaId = null;
+        uiState.selectedEnglishId = null;
+        uiState.incorrectPairIds.clear();
+      }
+
+      function resolveSelectionIfReady() {
+        if (!uiState.selectedKannadaId || !uiState.selectedEnglishId) {
+          renderRound(currentRound);
+          return;
+        }
+
+        if (uiState.selectedKannadaId === uiState.selectedEnglishId) {
+          uiState.matchedPairIds.add(uiState.selectedKannadaId);
+          clearSelections();
+          renderRound(currentRound);
+          return;
+        }
+
+        uiState.incorrectPairIds = new Set([
+          uiState.selectedKannadaId,
+          uiState.selectedEnglishId
+        ]);
+        uiState.isFeedbackLocked = true;
+        renderRound(currentRound);
+
+        window.setTimeout(() => {
+          clearSelections();
+          uiState.isFeedbackLocked = false;
+          renderRound(currentRound);
+        }, INCORRECT_RESET_DELAY_MS);
+      }
+
+      function handleTileSelection(tileType, pairId) {
+        if (uiState.isFeedbackLocked || uiState.matchedPairIds.has(pairId)) {
+          return;
+        }
+
+        if (tileType === "kannada") {
+          uiState.selectedKannadaId =
+            uiState.selectedKannadaId === pairId ? null : pairId;
+        }
+
+        if (tileType === "english") {
+          uiState.selectedEnglishId =
+            uiState.selectedEnglishId === pairId ? null : pairId;
+        }
+
+        resolveSelectionIfReady();
+      }
+
+      function handleTileActivation(event) {
+        const tile = event.target.closest(".tile");
+
+        if (!tile) {
+          return;
+        }
+
+        handleTileSelection(tile.dataset.tileType, tile.dataset.pairId);
       }
 
       // Keep the rendered round in memory so later issues can add interaction cleanly.
       const currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
+      const uiState = {
+        selectedKannadaId: null,
+        selectedEnglishId: null,
+        matchedPairIds: new Set(),
+        incorrectPairIds: new Set(),
+        isFeedbackLocked: false
+      };
+
+      document.addEventListener("click", handleTileActivation);
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") {
+          return;
+        }
+
+        const tile = event.target.closest(".tile");
+
+        if (!tile) {
+          return;
+        }
+
+        event.preventDefault();
+        handleTileSelection(tile.dataset.tileType, tile.dataset.pairId);
+      });
+
       renderRound(currentRound);
     </script>
   </body>
