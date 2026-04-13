@@ -252,8 +252,33 @@
         font-weight: 700;
         color: #fffaf2;
         background: var(--accent);
+        cursor: pointer;
+        opacity: 1;
+        transition:
+          transform 160ms ease,
+          opacity 160ms ease,
+          box-shadow 160ms ease,
+          background 160ms ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(157, 92, 47, 0.2);
+      }
+
+      button:focus-visible {
+        outline: 3px solid rgba(157, 92, 47, 0.28);
+        outline-offset: 3px;
+      }
+
+      button:disabled {
         cursor: not-allowed;
         opacity: 0.7;
+        box-shadow: none;
+      }
+
+      button:disabled:hover {
+        transform: none;
       }
 
       .button-secondary {
@@ -267,6 +292,16 @@
         border-radius: 18px;
         border: 1px solid var(--border);
         background: rgba(255, 250, 242, 0.9);
+        transition:
+          border-color 160ms ease,
+          background 160ms ease,
+          box-shadow 160ms ease;
+      }
+
+      .status.completed {
+        border-color: var(--matched-border);
+        background: linear-gradient(180deg, rgba(223, 243, 223, 0.95) 0%, rgba(207, 236, 204, 0.95) 100%);
+        box-shadow: 0 0 0 4px rgba(103, 149, 107, 0.1);
       }
 
       .status p {
@@ -332,18 +367,16 @@
           <span id="dataset-count" aria-live="polite"></span>
         </div>
         <p class="controls-copy">
-          Select one Kannada tile and one English tile to test a pair. Replay
-          and new-round controls still stay inactive in this issue.
+          Match all 5 pairs to complete the round, then start another one here
+          without reloading the page.
         </p>
         <div class="button-row">
-          <button type="button" disabled>Start Round</button>
-          <button type="button" class="button-secondary" disabled>Replay</button>
+          <button id="new-round-button" type="button">New Round</button>
         </div>
         <div class="status" role="status" aria-live="polite">
           <h2>Current Status</h2>
           <p id="status-message">
-            One round is rendered from the embedded dataset. Matching logic is
-            not active yet.
+            Tap one Kannada tile and one English tile to make a match.
           </p>
         </div>
       </section>
@@ -459,6 +492,10 @@
       }
 
       function getStatusMessage() {
+        if (uiState.isRoundComplete) {
+          return "Round complete. All 5 pairs are matched. Start a new round when you are ready.";
+        }
+
         if (uiState.isFeedbackLocked) {
           return "Not a match. Try again in a moment.";
         }
@@ -507,6 +544,8 @@
         const englishList = document.getElementById("english-list");
         const datasetCount = document.getElementById("dataset-count");
         const statusMessage = document.getElementById("status-message");
+        const statusPanel = document.querySelector(".status");
+        const newRoundButton = document.getElementById("new-round-button");
 
         kannadaList.textContent = "";
         englishList.textContent = "";
@@ -544,14 +583,39 @@
         });
 
         datasetCount.textContent =
-          ROUND_SIZE + " of " + STARTER_DATASET.length + " words in this round";
+          uiState.matchedPairIds.size +
+          " of " +
+          ROUND_SIZE +
+          " pairs matched";
         statusMessage.textContent = getStatusMessage();
+        statusPanel.classList.toggle("completed", uiState.isRoundComplete);
+        newRoundButton.textContent = uiState.isRoundComplete ? "Play Another Round" : "New Round";
       }
 
       function clearSelections() {
         uiState.selectedKannadaId = null;
         uiState.selectedEnglishId = null;
         uiState.incorrectPairIds.clear();
+      }
+
+      function resetUiState() {
+        if (uiState.incorrectResetTimerId !== null) {
+          window.clearTimeout(uiState.incorrectResetTimerId);
+        }
+
+        uiState.selectedKannadaId = null;
+        uiState.selectedEnglishId = null;
+        uiState.matchedPairIds = new Set();
+        uiState.incorrectPairIds = new Set();
+        uiState.isFeedbackLocked = false;
+        uiState.isRoundComplete = false;
+        uiState.incorrectResetTimerId = null;
+      }
+
+      function startNewRound() {
+        currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
+        resetUiState();
+        renderRound(currentRound);
       }
 
       function resolveSelectionIfReady() {
@@ -563,6 +627,7 @@
         if (uiState.selectedKannadaId === uiState.selectedEnglishId) {
           uiState.matchedPairIds.add(uiState.selectedKannadaId);
           clearSelections();
+          uiState.isRoundComplete = uiState.matchedPairIds.size === ROUND_SIZE;
           renderRound(currentRound);
           return;
         }
@@ -574,15 +639,20 @@
         uiState.isFeedbackLocked = true;
         renderRound(currentRound);
 
-        window.setTimeout(() => {
+        uiState.incorrectResetTimerId = window.setTimeout(() => {
           clearSelections();
           uiState.isFeedbackLocked = false;
+          uiState.incorrectResetTimerId = null;
           renderRound(currentRound);
         }, INCORRECT_RESET_DELAY_MS);
       }
 
       function handleTileSelection(tileType, pairId) {
-        if (uiState.isFeedbackLocked || uiState.matchedPairIds.has(pairId)) {
+        if (
+          uiState.isFeedbackLocked ||
+          uiState.isRoundComplete ||
+          uiState.matchedPairIds.has(pairId)
+        ) {
           return;
         }
 
@@ -610,13 +680,15 @@
       }
 
       // Keep the rendered round in memory so later issues can add interaction cleanly.
-      const currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
+      let currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
       const uiState = {
         selectedKannadaId: null,
         selectedEnglishId: null,
         matchedPairIds: new Set(),
         incorrectPairIds: new Set(),
-        isFeedbackLocked: false
+        isFeedbackLocked: false,
+        isRoundComplete: false,
+        incorrectResetTimerId: null
       };
 
       document.addEventListener("click", handleTileActivation);
@@ -634,6 +706,9 @@
         event.preventDefault();
         handleTileSelection(tile.dataset.tileType, tile.dataset.pairId);
       });
+      document
+        .getElementById("new-round-button")
+        .addEventListener("click", startNewRound);
 
       renderRound(currentRound);
     </script>
