@@ -1,0 +1,652 @@
+[
+  {
+    "id": "mane",
+    "kannada": "ಮನೆ",
+    "devanagari": "मने",
+    "english": "house",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "place"
+    ]
+  },
+  {
+    "id": "kone",
+    "kannada": "ಕೋಣೆ",
+    "devanagari": "कोणे",
+    "english": "room",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "place"
+    ]
+  },
+  {
+    "id": "baagilu",
+    "kannada": "ಬಾಗಿಲು",
+    "devanagari": "बागिलु",
+    "english": "door",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "object"
+    ]
+  },
+  {
+    "id": "kitaki",
+    "kannada": "ಕಿಟಕಿ",
+    "devanagari": "किटकि",
+    "english": "window",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "object"
+    ]
+  },
+  {
+    "id": "kurchi",
+    "kannada": "ಕುರ್ಚಿ",
+    "devanagari": "कुर्चि",
+    "english": "chair",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "furniture"
+    ]
+  },
+  {
+    "id": "meju",
+    "kannada": "ಮೇಜು",
+    "devanagari": "मेजु",
+    "english": "table",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "furniture"
+    ]
+  },
+  {
+    "id": "deepa",
+    "kannada": "ದೀಪ",
+    "devanagari": "दीप",
+    "english": "lamp",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "object"
+    ]
+  },
+  {
+    "id": "haasige",
+    "kannada": "ಹಾಸಿಗೆ",
+    "devanagari": "हासिगे",
+    "english": "bed",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "object"
+    ]
+  },
+  {
+    "id": "gode",
+    "kannada": "ಗೋಡೆ",
+    "devanagari": "गोडे",
+    "english": "wall",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "object"
+    ]
+  },
+  {
+    "id": "chaape",
+    "kannada": "ಚಾಪೆ",
+    "devanagari": "चापे",
+    "english": "mat",
+    "category": "home",
+    "difficulty_band": "core",
+    "intro_stage": 1,
+    "tags": [
+      "inanimate",
+      "object"
+    ]
+  },
+  {
+    "id": "appa",
+    "kannada": "ಅಪ್ಪ",
+    "devanagari": "अप्प",
+    "english": "father",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "amma",
+    "kannada": "ಅಮ್ಮ",
+    "devanagari": "अम्म",
+    "english": "mother",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "anna",
+    "kannada": "ಅಣ್ಣ",
+    "devanagari": "अण्ण",
+    "english": "elder brother",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "akka",
+    "kannada": "ಅಕ್ಕ",
+    "devanagari": "अक्क",
+    "english": "elder sister",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "tamma",
+    "kannada": "ತಮ್ಮ",
+    "devanagari": "तम्म",
+    "english": "younger brother",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "tangi",
+    "kannada": "ತಂಗಿ",
+    "devanagari": "तंगि",
+    "english": "younger sister",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "maga",
+    "kannada": "ಮಗ",
+    "devanagari": "मग",
+    "english": "son",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "magalu",
+    "kannada": "ಮಗಳು",
+    "devanagari": "मगळु",
+    "english": "daughter",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "magu",
+    "kannada": "ಮಗು",
+    "devanagari": "मगु",
+    "english": "child",
+    "category": "family",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "kin"
+    ]
+  },
+  {
+    "id": "snehita",
+    "kannada": "ಸ್ನೇಹಿತ",
+    "devanagari": "स्नेहित",
+    "english": "friend",
+    "category": "people",
+    "difficulty_band": "core",
+    "intro_stage": 2,
+    "tags": [
+      "animate",
+      "human"
+    ]
+  },
+  {
+    "id": "kai",
+    "kannada": "ಕೈ",
+    "devanagari": "कै",
+    "english": "hand",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "kaalu",
+    "kannada": "ಕಾಲು",
+    "devanagari": "कालु",
+    "english": "foot",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "kannu",
+    "kannada": "ಕಣ್ಣು",
+    "devanagari": "कण्णु",
+    "english": "eye",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "kivi",
+    "kannada": "ಕಿವಿ",
+    "devanagari": "किवि",
+    "english": "ear",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "baayi",
+    "kannada": "ಬಾಯಿ",
+    "devanagari": "बायि",
+    "english": "mouth",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "tale",
+    "kannada": "ತಲೆ",
+    "devanagari": "तले",
+    "english": "head",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "moogu",
+    "kannada": "ಮೂಗು",
+    "devanagari": "मूगु",
+    "english": "nose",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "beralu",
+    "kannada": "ಬೆರಳು",
+    "devanagari": "बेरळु",
+    "english": "finger",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "hotte",
+    "kannada": "ಹೊಟ್ಟೆ",
+    "devanagari": "होट्टे",
+    "english": "stomach",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "hallu",
+    "kannada": "ಹಲ್ಲು",
+    "devanagari": "हल्लु",
+    "english": "tooth",
+    "category": "body",
+    "difficulty_band": "core",
+    "intro_stage": 3,
+    "tags": [
+      "body",
+      "concrete"
+    ]
+  },
+  {
+    "id": "mara",
+    "kannada": "ಮರ",
+    "devanagari": "मर",
+    "english": "tree",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "concrete"
+    ]
+  },
+  {
+    "id": "hoovu",
+    "kannada": "ಹೂವು",
+    "devanagari": "हूवु",
+    "english": "flower",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "concrete"
+    ]
+  },
+  {
+    "id": "surya",
+    "kannada": "ಸೂರ್ಯ",
+    "devanagari": "सूर्य",
+    "english": "sun",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "sky"
+    ]
+  },
+  {
+    "id": "chandra",
+    "kannada": "ಚಂದ್ರ",
+    "devanagari": "चंद्र",
+    "english": "moon",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "sky"
+    ]
+  },
+  {
+    "id": "male",
+    "kannada": "ಮಳೆ",
+    "devanagari": "मळे",
+    "english": "rain",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "weather"
+    ]
+  },
+  {
+    "id": "gaali",
+    "kannada": "ಗಾಳಿ",
+    "devanagari": "गाळि",
+    "english": "wind",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "weather"
+    ]
+  },
+  {
+    "id": "kallu",
+    "kannada": "ಕಲ್ಲು",
+    "devanagari": "कल्लु",
+    "english": "stone",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "concrete"
+    ]
+  },
+  {
+    "id": "nela",
+    "kannada": "ನೆಲ",
+    "devanagari": "नेल",
+    "english": "ground",
+    "category": "nature",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "nature",
+      "place"
+    ]
+  },
+  {
+    "id": "hakki",
+    "kannada": "ಹಕ್ಕಿ",
+    "devanagari": "हक्कि",
+    "english": "bird",
+    "category": "animal",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "animate",
+      "animal"
+    ]
+  },
+  {
+    "id": "naayi",
+    "kannada": "ನಾಯಿ",
+    "devanagari": "नायि",
+    "english": "dog",
+    "category": "animal",
+    "difficulty_band": "core",
+    "intro_stage": 4,
+    "tags": [
+      "animate",
+      "animal"
+    ]
+  },
+  {
+    "id": "neeru",
+    "kannada": "ನೀರು",
+    "devanagari": "नीरु",
+    "english": "water",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "haalu",
+    "kannada": "ಹಾಲು",
+    "devanagari": "हालु",
+    "english": "milk",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "hannu",
+    "kannada": "ಹಣ್ಣು",
+    "devanagari": "हण्णु",
+    "english": "fruit",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "oota",
+    "kannada": "ಊಟ",
+    "devanagari": "ऊट",
+    "english": "meal",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "akki",
+    "kannada": "ಅಕ್ಕಿ",
+    "devanagari": "अक्कि",
+    "english": "raw rice",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "uppu",
+    "kannada": "ಉಪ್ಪು",
+    "devanagari": "उप्पु",
+    "english": "salt",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "sakkare",
+    "kannada": "ಸಕ್ಕರೆ",
+    "devanagari": "सक्करे",
+    "english": "sugar",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  },
+  {
+    "id": "kaapi",
+    "kannada": "ಕಾಫಿ",
+    "devanagari": "कापि",
+    "english": "coffee",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "drink",
+      "daily"
+    ]
+  },
+  {
+    "id": "chaha",
+    "kannada": "ಚಹಾ",
+    "devanagari": "चहा",
+    "english": "tea",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "drink",
+      "daily"
+    ]
+  },
+  {
+    "id": "tindi",
+    "kannada": "ತಿಂಡಿ",
+    "devanagari": "तिंडि",
+    "english": "snack",
+    "category": "food_daily",
+    "difficulty_band": "core",
+    "intro_stage": 5,
+    "tags": [
+      "food",
+      "daily"
+    ]
+  }
+]
