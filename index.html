@@ -387,330 +387,344 @@
     </main>
 
     <script>
-      const STARTER_DATASET = [
-        { id: "mane", kannada: "ಮನೆ", devanagari: "मने", english: "house" },
-        { id: "neeru", kannada: "ನೀರು", devanagari: "नीरु", english: "water" },
-        { id: "pustaka", kannada: "ಪುಸ್ತಕ", devanagari: "पुस्तक", english: "book" },
-        { id: "shaale", kannada: "ಶಾಲೆ", devanagari: "शाळे", english: "school" },
-        { id: "hoovu", kannada: "ಹೂವು", devanagari: "हूवु", english: "flower" },
-        { id: "hannu", kannada: "ಹಣ್ಣು", devanagari: "हण्णु", english: "fruit" },
-        { id: "oota", kannada: "ಊಟ", devanagari: "ऊट", english: "food" },
-        { id: "surya", kannada: "ಸೂರ್ಯ", devanagari: "सूर्य", english: "sun" },
-        { id: "chandra", kannada: "ಚಂದ್ರ", devanagari: "चंद्र", english: "moon" },
-        { id: "magu", kannada: "ಮಗು", devanagari: "मगु", english: "child" },
-        { id: "haalu", kannada: "ಹಾಲು", devanagari: "हालु", english: "milk" },
-        { id: "baagilu", kannada: "ಬಾಗಿಲು", devanagari: "बागिलु", english: "door" },
-        { id: "kitaki", kannada: "ಕಿಟಕಿ", devanagari: "किटकि", english: "window" },
-        { id: "raste", kannada: "ರಸ್ತೆ", devanagari: "रस्ते", english: "road" },
-        { id: "bekku", kannada: "ಬೆಕ್ಕು", devanagari: "बेक्कु", english: "cat" },
-        { id: "naayi", kannada: "ನಾಯಿ", devanagari: "नायी", english: "dog" },
-        { id: "mara", kannada: "ಮರ", devanagari: "मर", english: "tree" },
-        { id: "kai", kannada: "ಕೈ", devanagari: "कै", english: "hand" },
-        { id: "kannu", kannada: "ಕಣ್ಣು", devanagari: "कण्णु", english: "eye" },
-        { id: "kivi", kannada: "ಕಿವಿ", devanagari: "किवि", english: "ear" }
-      ];
+      const AppConfig = {
+        roundSize: 5,
+        incorrectResetDelayMs: 800
+      };
 
-      const ROUND_SIZE = 5;
-      const INCORRECT_RESET_DELAY_MS = 800;
+      const Deck = {
+        starterDataset: [
+          { id: "mane", kannada: "ಮನೆ", devanagari: "मने", english: "house" },
+          { id: "neeru", kannada: "ನೀರು", devanagari: "नीरु", english: "water" },
+          { id: "pustaka", kannada: "ಪುಸ್ತಕ", devanagari: "पुस्तक", english: "book" },
+          { id: "shaale", kannada: "ಶಾಲೆ", devanagari: "शाळे", english: "school" },
+          { id: "hoovu", kannada: "ಹೂವು", devanagari: "हूवु", english: "flower" },
+          { id: "hannu", kannada: "ಹಣ್ಣು", devanagari: "हण्णु", english: "fruit" },
+          { id: "oota", kannada: "ಊಟ", devanagari: "ऊट", english: "food" },
+          { id: "surya", kannada: "ಸೂರ್ಯ", devanagari: "सूर्य", english: "sun" },
+          { id: "chandra", kannada: "ಚಂದ್ರ", devanagari: "चंद्र", english: "moon" },
+          { id: "magu", kannada: "ಮಗು", devanagari: "मगु", english: "child" },
+          { id: "haalu", kannada: "ಹಾಲು", devanagari: "हालु", english: "milk" },
+          { id: "baagilu", kannada: "ಬಾಗಿಲು", devanagari: "बागिलु", english: "door" },
+          { id: "kitaki", kannada: "ಕಿಟಕಿ", devanagari: "किटकि", english: "window" },
+          { id: "raste", kannada: "ರಸ್ತೆ", devanagari: "रस्ते", english: "road" },
+          { id: "bekku", kannada: "ಬೆಕ್ಕು", devanagari: "बेक्कु", english: "cat" },
+          { id: "naayi", kannada: "ನಾಯಿ", devanagari: "नायी", english: "dog" },
+          { id: "mara", kannada: "ಮರ", devanagari: "मर", english: "tree" },
+          { id: "kai", kannada: "ಕೈ", devanagari: "कै", english: "hand" },
+          { id: "kannu", kannada: "ಕಣ್ಣು", devanagari: "कण्णु", english: "eye" },
+          { id: "kivi", kannada: "ಕಿವಿ", devanagari: "किवि", english: "ear" }
+        ],
 
-      function shuffleArray(items) {
-        const copy = [...items];
+        shuffle(items) {
+          const copy = [...items];
 
-        for (let index = copy.length - 1; index > 0; index -= 1) {
-          const swapIndex = Math.floor(Math.random() * (index + 1));
-          const current = copy[index];
-          copy[index] = copy[swapIndex];
-          copy[swapIndex] = current;
-        }
+          for (let index = copy.length - 1; index > 0; index -= 1) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            const current = copy[index];
+            copy[index] = copy[swapIndex];
+            copy[swapIndex] = current;
+          }
 
-        return copy;
-      }
+          return copy;
+        },
 
-      function createRound(dataset, roundSize) {
-        const kannadaPairs = shuffleArray(dataset).slice(0, roundSize);
-        let englishPairs = shuffleArray(kannadaPairs);
-
-        // Keep Kannada stable and ensure English is not rendered in the exact same order.
-        while (
-          roundSize > 1 &&
-          englishPairs.every((pair, index) => pair.id === kannadaPairs[index].id)
-        ) {
-          englishPairs = shuffleArray(kannadaPairs);
-        }
-
-        return { kannadaPairs, englishPairs };
-      }
-
-      function createTile(content) {
-        const article = document.createElement("article");
-        article.className = "tile " + content.variant;
-        article.dataset.pairId = content.pairId;
-        article.dataset.tileType = content.tileType;
-        article.setAttribute("role", "button");
-        article.setAttribute("tabindex", content.disabled ? "-1" : "0");
-        article.setAttribute("aria-disabled", content.disabled ? "true" : "false");
-
-        const label = document.createElement("p");
-        label.className = "tile-label";
-        label.textContent = content.label;
-        article.appendChild(label);
-
-        if (content.support) {
-          const support = document.createElement("p");
-          support.className = "tile-support";
-          support.textContent = content.support;
-          article.appendChild(support);
-        }
-
-        const meta = document.createElement("p");
-        meta.className = "tile-meta";
-        meta.textContent = content.meta;
-        article.appendChild(meta);
-
-        if (content.stateClasses.length > 0) {
-          article.classList.add(...content.stateClasses);
-        }
-
-        return article;
-      }
-
-      function getTileStateClasses(tileType, pairId) {
-        const stateClasses = [];
-        const isSelected =
-          (tileType === "kannada" && uiState.selectedKannadaId === pairId) ||
-          (tileType === "english" && uiState.selectedEnglishId === pairId);
-
-        if (uiState.matchedPairIds.has(pairId)) {
-          stateClasses.push("matched", "disabled");
-        } else if (uiState.incorrectPairIds.has(pairId)) {
-          stateClasses.push("incorrect");
-        } else if (isSelected) {
-          stateClasses.push("selected");
-        }
-
-        return stateClasses;
-      }
-
-      function getStatusMessage() {
-        if (uiState.isRoundComplete) {
-          return "Round complete. All 5 pairs are matched. Start a new round when you are ready.";
-        }
-
-        if (uiState.isFeedbackLocked) {
-          return "Not a match. Try again in a moment.";
-        }
-
-        if (uiState.selectedKannadaId && uiState.selectedEnglishId) {
-          return "Checking the selected pair.";
-        }
-
-        if (uiState.selectedKannadaId) {
-          return "Kannada selected. Now choose the matching English meaning.";
-        }
-
-        if (uiState.selectedEnglishId) {
-          return "English selected. Now choose the matching Kannada word.";
-        }
-
-        return "Tap one Kannada tile and one English tile to make a match.";
-      }
-
-      function getKannadaTileMeta(pairId) {
-        if (uiState.matchedPairIds.has(pairId)) {
-          return "Matched";
-        }
-
-        if (uiState.selectedKannadaId === pairId) {
-          return "Selected";
-        }
-
-        return "Tap to select";
-      }
-
-      function getEnglishTileMeta(pairId) {
-        if (uiState.matchedPairIds.has(pairId)) {
-          return "Matched";
-        }
-
-        if (uiState.selectedEnglishId === pairId) {
-          return "Selected";
-        }
-
-        return "Tap to select";
-      }
-
-      function renderRound(roundState) {
-        const kannadaList = document.getElementById("kannada-list");
-        const englishList = document.getElementById("english-list");
-        const datasetCount = document.getElementById("dataset-count");
-        const statusMessage = document.getElementById("status-message");
-        const statusPanel = document.querySelector(".status");
-        const newRoundButton = document.getElementById("new-round-button");
-
-        kannadaList.textContent = "";
-        englishList.textContent = "";
-
-        // Kannada tiles stay in the selected round order for future matching logic.
-        roundState.kannadaPairs.forEach((item) => {
-          kannadaList.appendChild(
-            createTile({
-              pairId: item.id,
-              tileType: "kannada",
-              variant: "kannada-tile",
-              disabled: uiState.matchedPairIds.has(item.id),
-              stateClasses: getTileStateClasses("kannada", item.id),
-              label: item.kannada,
-              support: item.devanagari,
-              meta: getKannadaTileMeta(item.id)
-            })
+        createRound() {
+          const kannadaPairs = Deck.shuffle(Deck.starterDataset).slice(
+            0,
+            AppConfig.roundSize
           );
-        });
+          let englishPairs = Deck.shuffle(kannadaPairs);
 
-        // English meaning tiles use the same pair IDs, but a separately shuffled order.
-        roundState.englishPairs.forEach((item, index) => {
-          englishList.appendChild(
-            createTile({
-              pairId: item.id,
-              tileType: "english",
-              variant: "english-tile",
-              disabled: uiState.matchedPairIds.has(item.id),
-              stateClasses: getTileStateClasses("english", item.id),
-              label: item.english,
-              support: "Meaning " + (index + 1),
-              meta: getEnglishTileMeta(item.id)
-            })
-          );
-        });
+          while (
+            AppConfig.roundSize > 1 &&
+            englishPairs.every((pair, index) => pair.id === kannadaPairs[index].id)
+          ) {
+            englishPairs = Deck.shuffle(kannadaPairs);
+          }
 
-        datasetCount.textContent =
-          uiState.matchedPairIds.size +
-          " of " +
-          ROUND_SIZE +
-          " pairs matched";
-        statusMessage.textContent = getStatusMessage();
-        statusPanel.classList.toggle("completed", uiState.isRoundComplete);
-        newRoundButton.textContent = uiState.isRoundComplete ? "Play Another Round" : "New Round";
-      }
-
-      function clearSelections() {
-        uiState.selectedKannadaId = null;
-        uiState.selectedEnglishId = null;
-        uiState.incorrectPairIds.clear();
-      }
-
-      function resetUiState() {
-        if (uiState.incorrectResetTimerId !== null) {
-          window.clearTimeout(uiState.incorrectResetTimerId);
+          return { kannadaPairs, englishPairs };
         }
+      };
 
-        uiState.selectedKannadaId = null;
-        uiState.selectedEnglishId = null;
-        uiState.matchedPairIds = new Set();
-        uiState.incorrectPairIds = new Set();
-        uiState.isFeedbackLocked = false;
-        uiState.isRoundComplete = false;
-        uiState.incorrectResetTimerId = null;
-      }
+      const Storage = {
+        load() {
+          return null;
+        },
 
-      function startNewRound() {
-        currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
-        resetUiState();
-        renderRound(currentRound);
-      }
-
-      function resolveSelectionIfReady() {
-        if (!uiState.selectedKannadaId || !uiState.selectedEnglishId) {
-          renderRound(currentRound);
-          return;
+        save() {
+          // Persistence is intentionally out of scope for this milestone.
         }
+      };
 
-        if (uiState.selectedKannadaId === uiState.selectedEnglishId) {
-          uiState.matchedPairIds.add(uiState.selectedKannadaId);
-          clearSelections();
-          uiState.isRoundComplete = uiState.matchedPairIds.size === ROUND_SIZE;
-          renderRound(currentRound);
-          return;
-        }
-
-        uiState.incorrectPairIds = new Set([
-          uiState.selectedKannadaId,
-          uiState.selectedEnglishId
-        ]);
-        uiState.isFeedbackLocked = true;
-        renderRound(currentRound);
-
-        uiState.incorrectResetTimerId = window.setTimeout(() => {
-          clearSelections();
-          uiState.isFeedbackLocked = false;
-          uiState.incorrectResetTimerId = null;
-          renderRound(currentRound);
-        }, INCORRECT_RESET_DELAY_MS);
-      }
-
-      function handleTileSelection(tileType, pairId) {
-        if (
-          uiState.isFeedbackLocked ||
-          uiState.isRoundComplete ||
-          uiState.matchedPairIds.has(pairId)
-        ) {
-          return;
-        }
-
-        if (tileType === "kannada") {
-          uiState.selectedKannadaId =
-            uiState.selectedKannadaId === pairId ? null : pairId;
-        }
-
-        if (tileType === "english") {
-          uiState.selectedEnglishId =
-            uiState.selectedEnglishId === pairId ? null : pairId;
-        }
-
-        resolveSelectionIfReady();
-      }
-
-      function handleTileActivation(event) {
-        const tile = event.target.closest(".tile");
-
-        if (!tile) {
-          return;
-        }
-
-        handleTileSelection(tile.dataset.tileType, tile.dataset.pairId);
-      }
-
-      // Keep the rendered round in memory so later issues can add interaction cleanly.
-      let currentRound = createRound(STARTER_DATASET, ROUND_SIZE);
-      const uiState = {
+      const State = {
+        round: Deck.createRound(),
         selectedKannadaId: null,
         selectedEnglishId: null,
         matchedPairIds: new Set(),
         incorrectPairIds: new Set(),
         isFeedbackLocked: false,
         isRoundComplete: false,
-        incorrectResetTimerId: null
+        incorrectResetTimerId: null,
+
+        clearSelections() {
+          State.selectedKannadaId = null;
+          State.selectedEnglishId = null;
+          State.incorrectPairIds.clear();
+        },
+
+        resetRoundUi() {
+          if (State.incorrectResetTimerId !== null) {
+            window.clearTimeout(State.incorrectResetTimerId);
+          }
+
+          State.selectedKannadaId = null;
+          State.selectedEnglishId = null;
+          State.matchedPairIds = new Set();
+          State.incorrectPairIds = new Set();
+          State.isFeedbackLocked = false;
+          State.isRoundComplete = false;
+          State.incorrectResetTimerId = null;
+        },
+
+        startNewRound() {
+          State.round = Deck.createRound();
+          State.resetRoundUi();
+        }
       };
 
-      document.addEventListener("click", handleTileActivation);
-      document.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") {
-          return;
+      const UI = {
+        elements: {
+          kannadaList: document.getElementById("kannada-list"),
+          englishList: document.getElementById("english-list"),
+          datasetCount: document.getElementById("dataset-count"),
+          statusMessage: document.getElementById("status-message"),
+          statusPanel: document.querySelector(".status"),
+          newRoundButton: document.getElementById("new-round-button")
+        },
+
+        createTile(content) {
+          const article = document.createElement("article");
+          article.className = "tile " + content.variant;
+          article.dataset.pairId = content.pairId;
+          article.dataset.tileType = content.tileType;
+          article.setAttribute("role", "button");
+          article.setAttribute("tabindex", content.disabled ? "-1" : "0");
+          article.setAttribute("aria-disabled", content.disabled ? "true" : "false");
+
+          const label = document.createElement("p");
+          label.className = "tile-label";
+          label.textContent = content.label;
+          article.appendChild(label);
+
+          if (content.support) {
+            const support = document.createElement("p");
+            support.className = "tile-support";
+            support.textContent = content.support;
+            article.appendChild(support);
+          }
+
+          const meta = document.createElement("p");
+          meta.className = "tile-meta";
+          meta.textContent = content.meta;
+          article.appendChild(meta);
+
+          if (content.stateClasses.length > 0) {
+            article.classList.add(...content.stateClasses);
+          }
+
+          return article;
+        },
+
+        getTileStateClasses(tileType, pairId) {
+          const stateClasses = [];
+          const isSelected =
+            (tileType === "kannada" && State.selectedKannadaId === pairId) ||
+            (tileType === "english" && State.selectedEnglishId === pairId);
+
+          if (State.matchedPairIds.has(pairId)) {
+            stateClasses.push("matched", "disabled");
+          } else if (State.incorrectPairIds.has(pairId)) {
+            stateClasses.push("incorrect");
+          } else if (isSelected) {
+            stateClasses.push("selected");
+          }
+
+          return stateClasses;
+        },
+
+        getStatusMessage() {
+          if (State.isRoundComplete) {
+            return "Round complete. All 5 pairs are matched. Start a new round when you are ready.";
+          }
+
+          if (State.isFeedbackLocked) {
+            return "Not a match. Try again in a moment.";
+          }
+
+          if (State.selectedKannadaId && State.selectedEnglishId) {
+            return "Checking the selected pair.";
+          }
+
+          if (State.selectedKannadaId) {
+            return "Kannada selected. Now choose the matching English meaning.";
+          }
+
+          if (State.selectedEnglishId) {
+            return "English selected. Now choose the matching Kannada word.";
+          }
+
+          return "Tap one Kannada tile and one English tile to make a match.";
+        },
+
+        getTileMeta(tileType, pairId) {
+          if (State.matchedPairIds.has(pairId)) {
+            return "Matched";
+          }
+
+          if (
+            (tileType === "kannada" && State.selectedKannadaId === pairId) ||
+            (tileType === "english" && State.selectedEnglishId === pairId)
+          ) {
+            return "Selected";
+          }
+
+          return "Tap to select";
+        },
+
+        renderColumn(listElement, pairs, tileType) {
+          listElement.textContent = "";
+
+          pairs.forEach((item, index) => {
+            const isKannada = tileType === "kannada";
+            listElement.appendChild(
+              UI.createTile({
+                pairId: item.id,
+                tileType,
+                variant: isKannada ? "kannada-tile" : "english-tile",
+                disabled: State.matchedPairIds.has(item.id),
+                stateClasses: UI.getTileStateClasses(tileType, item.id),
+                label: isKannada ? item.kannada : item.english,
+                support: isKannada ? item.devanagari : "Meaning " + (index + 1),
+                meta: UI.getTileMeta(tileType, item.id)
+              })
+            );
+          });
+        },
+
+        render() {
+          UI.renderColumn(UI.elements.kannadaList, State.round.kannadaPairs, "kannada");
+          UI.renderColumn(UI.elements.englishList, State.round.englishPairs, "english");
+
+          UI.elements.datasetCount.textContent =
+            State.matchedPairIds.size +
+            " of " +
+            AppConfig.roundSize +
+            " pairs matched";
+          UI.elements.statusMessage.textContent = UI.getStatusMessage();
+          UI.elements.statusPanel.classList.toggle("completed", State.isRoundComplete);
+          UI.elements.newRoundButton.textContent = State.isRoundComplete
+            ? "Play Another Round"
+            : "New Round";
         }
+      };
 
-        const tile = event.target.closest(".tile");
+      const Engine = {
+        resolveSelectionsIfReady() {
+          if (!State.selectedKannadaId || !State.selectedEnglishId) {
+            UI.render();
+            return;
+          }
 
-        if (!tile) {
-          return;
+          if (State.selectedKannadaId === State.selectedEnglishId) {
+            State.matchedPairIds.add(State.selectedKannadaId);
+            State.clearSelections();
+            State.isRoundComplete =
+              State.matchedPairIds.size === AppConfig.roundSize;
+            UI.render();
+            return;
+          }
+
+          State.incorrectPairIds = new Set([
+            State.selectedKannadaId,
+            State.selectedEnglishId
+          ]);
+          State.isFeedbackLocked = true;
+          UI.render();
+
+          State.incorrectResetTimerId = window.setTimeout(() => {
+            State.clearSelections();
+            State.isFeedbackLocked = false;
+            State.incorrectResetTimerId = null;
+            UI.render();
+          }, AppConfig.incorrectResetDelayMs);
+        },
+
+        selectTile(tileType, pairId) {
+          if (
+            State.isFeedbackLocked ||
+            State.isRoundComplete ||
+            State.matchedPairIds.has(pairId)
+          ) {
+            return;
+          }
+
+          if (tileType === "kannada") {
+            State.selectedKannadaId =
+              State.selectedKannadaId === pairId ? null : pairId;
+          }
+
+          if (tileType === "english") {
+            State.selectedEnglishId =
+              State.selectedEnglishId === pairId ? null : pairId;
+          }
+
+          Engine.resolveSelectionsIfReady();
+        },
+
+        startNewRound() {
+          State.startNewRound();
+          Storage.save();
+          UI.render();
         }
+      };
 
-        event.preventDefault();
-        handleTileSelection(tile.dataset.tileType, tile.dataset.pairId);
-      });
-      document
-        .getElementById("new-round-button")
-        .addEventListener("click", startNewRound);
+      const App = {
+        handleTileActivation(event) {
+          const tile = event.target.closest(".tile");
 
-      renderRound(currentRound);
+          if (!tile) {
+            return;
+          }
+
+          Engine.selectTile(tile.dataset.tileType, tile.dataset.pairId);
+        },
+
+        handleKeydown(event) {
+          if (event.key !== "Enter" && event.key !== " ") {
+            return;
+          }
+
+          const tile = event.target.closest(".tile");
+
+          if (!tile) {
+            return;
+          }
+
+          event.preventDefault();
+          Engine.selectTile(tile.dataset.tileType, tile.dataset.pairId);
+        },
+
+        init() {
+          Storage.load();
+          document.addEventListener("click", App.handleTileActivation);
+          document.addEventListener("keydown", App.handleKeydown);
+          UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
+          UI.render();
+        }
+      };
+
+      App.init();
     </script>
   </body>
 </html>
