@@ -1,29 +1,31 @@
 # Kannada Words Match PWA
 
-Kannada Words Match PWA is a small single-file prototype for beginner Kannada vocabulary practice. It presents 5 Kannada words and 5 English meanings in two columns, lets the learner pair them with tap-to-select matching, gives immediate correct or incorrect feedback, and supports starting a fresh round from the embedded starter dataset without reloading the page.
+Kannada Words Match PWA is a lightweight single-file trainer for beginner Kannada vocabulary practice. It presents 5 Kannada words and 5 English meanings in two columns, lets the learner pair them with tap-to-select matching, gives immediate correct or incorrect feedback, and supports starting a fresh round from the embedded curated 50-word deck without reloading the page.
 
 ## v1 Features
 
-- Single-file `index.html` prototype with embedded HTML, CSS, JavaScript, and starter data
-- Fixed starter dataset embedded directly in the app
+- Single-file `index.html` app with embedded HTML, CSS, JavaScript, and curated deck data
+- Finalized curated 50-word beginner deck embedded directly in the app
 - Exactly 5 random word pairs per round
 - Kannada tiles with Devanagari scaffold shown beneath the Kannada text
-- English meanings shuffled independently from the Kannada column
+- English meanings shuffled independently from the Kannada column during active play
 - Tap-to-pair interaction with one active Kannada tile and one active English tile at a time
 - Correct-match confirmation with locked matched tiles
 - Incorrect-match feedback with automatic reset after a short delay
 - Round completion detection when all 5 pairs are matched
+- End-of-round English realignment so Kannada and English pairs line up visually after round completion
 - New-round control that starts another playable round without page reload
+- Internal logical refactor inside the single-file architecture to prepare for later persistence and stats work
 
 ## Out Of Scope In v1
 
-- Scoring
-- Progress tracking
+- Progress tracking and learner stats
 - Persistence or `localStorage`
-- Category-based word sets
+- Category- or stage-limited practice modes
+- Devanagari display modes
 - Audio or pronunciation playback
 - Leitner-lite or spaced repetition scheduling
-- Multiple game modes
+- Personal Deck / My Words support
 - Backend, accounts, or cloud sync
 
 ## Run Locally
@@ -35,14 +37,21 @@ No build step, package install, or local server is required for the current prot
 
 ## Prototype Note
 
-This Milestone 1 version is intentionally implemented as a single-file prototype. The full app shell, styles, interaction logic, and starter dataset all live in `index.html`.
+The current app remains intentionally implemented as a single-file web app. The full app shell, styles, interaction logic, and curated deck all live in `index.html`. Recent work has improved the internal logical structure while preserving the single-file design philosophy used across the broader Kannada app ecosystem.
 
 ## Roadmap
 
-Likely next improvements after Milestone 1:
+Planned next directions after the current curated-deck baseline:
 
-- Transliteration or pronunciation support for beginners who need more reading help
-- Category-based word sets instead of a single mixed starter pool
-- Progress tracking across rounds
-- Leitner-lite or spaced repetition ideas for review scheduling
+- versioned localStorage persistence and learner stats
+- lightweight session summary
+- Lite-Leitner-style review logic in a later milestone
+- Devanagari display modes: always on / tap to reveal / always off
+- category- and stage-limited practice
+- Personal Deck / My Words as a later product direction
 
+## Ideas parked for later
+
+- API-assisted vocabulary intake through a helper workflow
+- import / export workflows for learner-added vocabulary
+- optional pronunciation support
