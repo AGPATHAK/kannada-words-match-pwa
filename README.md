@@ -44,6 +44,7 @@ The current app remains intentionally implemented as a single-file web app. The 
 Planned next directions after the current curated-deck baseline:
 
 - versioned localStorage persistence and learner stats
+- future learner stats/review logic should distinguish direct correct matches from forced final-pair completion
 - lightweight session summary
 - Lite-Leitner-style review logic in a later milestone
 - Devanagari display modes: always on / tap to reveal / always off

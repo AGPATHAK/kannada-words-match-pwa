@@ -10,3 +10,4 @@
 - The app remains single-file by design, but the internal code was logically refactored into clearer sections to support later persistence and stats work.
 - At round completion, the English column realigns to the Kannada order so matched pairs line up visually.
 - UI fit and visual polish were adjusted after deck expansion so the app sits more comfortably in the viewport without changing gameplay.
+- The final remaining pair in a round should not be treated as equivalent to an actively recalled correct match, since it may be solved entirely by elimination.
