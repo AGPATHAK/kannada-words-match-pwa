@@ -47,14 +47,8 @@
         padding: 16px 14px 20px;
       }
 
-      .top-strip {
-        display: grid;
-        gap: 10px;
-      }
-
       .hero,
-      .board,
-      .controls {
+      .board {
         background: var(--panel);
         border: 1px solid rgba(191, 164, 111, 0.35);
         border-radius: 22px;
@@ -63,19 +57,14 @@
       }
 
       .hero {
-        padding: 16px 18px 16px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        padding: 14px 16px;
       }
 
-      .eyebrow {
-        margin: 0 0 8px;
-        font-size: 0.76rem;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--accent);
+      .hero-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
       }
 
       h1 {
@@ -85,21 +74,26 @@
         letter-spacing: -0.03em;
       }
 
-      .subtitle {
-        margin: 8px 0 0;
-        max-width: 36rem;
+      .progress-count {
+        flex: 0 0 auto;
         color: var(--muted);
-        font-size: 0.92rem;
-        line-height: 1.36;
+        font-size: 0.95rem;
+        font-weight: 700;
+        white-space: nowrap;
       }
 
-      .hero-note {
-        margin: 8px 0 0;
-        color: var(--accent);
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
+      .hero-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .hero-status {
+        min-width: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.32;
       }
 
       .board {
@@ -120,19 +114,14 @@
       .column-header {
         display: flex;
         align-items: baseline;
-        justify-content: space-between;
-        gap: 10px;
+        justify-content: flex-start;
+        gap: 0;
         margin-bottom: 8px;
       }
 
       .column-header h2 {
         margin: 0;
         font-size: 1rem;
-      }
-
-      .column-header span {
-        color: var(--muted);
-        font-size: 0.82rem;
       }
 
       .tile-list {
@@ -224,53 +213,7 @@
       }
 
       .tile-meta {
-        min-height: 0.95rem;
-        margin: 6px 0 0;
-        color: var(--accent);
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-      }
-
-      .tile-meta:empty {
         display: none;
-      }
-
-      .controls {
-        margin-top: 0;
-        padding: 14px;
-        display: grid;
-        align-content: start;
-        gap: 8px;
-      }
-
-      .controls-header {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 0;
-      }
-
-      .controls h2,
-      .status h2 {
-        margin: 0;
-        font-size: 1rem;
-      }
-
-      .controls-copy {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.88rem;
-        line-height: 1.3;
-      }
-
-      .button-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 2px;
       }
 
       button {
@@ -319,46 +262,9 @@
         background: linear-gradient(180deg, #f6e6d1 0%, var(--accent-soft) 100%);
       }
 
-      .status {
-        margin-top: 0;
-        padding: 11px 12px;
-        border-radius: 16px;
-        border: 1px solid var(--border);
-        background: rgba(255, 250, 242, 0.9);
-        transition:
-          border-color 160ms ease,
-          background 160ms ease,
-          box-shadow 160ms ease;
-      }
-
-      .status.completed {
-        border-color: var(--matched-border);
-        background: linear-gradient(180deg, rgba(223, 243, 223, 0.95) 0%, rgba(207, 236, 204, 0.95) 100%);
-        box-shadow: 0 0 0 4px rgba(103, 149, 107, 0.1);
-      }
-
-      .status p {
-        margin: 5px 0 0;
-        color: var(--muted);
-        font-size: 0.87rem;
-        line-height: 1.3;
-      }
-
-      .footer-note {
-        margin: 12px 0 0;
-        color: var(--muted);
-        font-size: 0.82rem;
-        text-align: center;
-      }
-
       @media (min-width: 760px) {
         .app {
           padding: 14px 18px 16px;
-        }
-
-        .top-strip {
-          grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.8fr);
-          align-items: stretch;
         }
 
         .board-grid {
@@ -370,16 +276,8 @@
           padding: 12px 16px 13px;
         }
 
-        .subtitle {
-          max-width: 34rem;
-        }
-
         .board {
           padding: 12px 14px;
-        }
-
-        .controls {
-          padding: 12px 13px;
         }
       }
 
@@ -397,55 +295,44 @@
           padding: 12px;
         }
 
-        .controls {
-          padding: 12px;
-        }
-
         .tile {
           padding: 11px 13px;
+        }
+      }
+
+      @media (max-width: 759px) {
+        .hero-header,
+        .hero-controls {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .hero-controls {
+          gap: 10px;
         }
       }
     </style>
   </head>
   <body>
     <main class="app">
-      <div class="top-strip">
-        <section class="hero" aria-label="App introduction">
-          <p class="eyebrow">Round Preview</p>
+      <section class="hero" aria-label="App introduction">
+        <div class="hero-header">
           <h1>Kannada Words Match</h1>
-          <p class="subtitle">
-            Match beginner-friendly Kannada words with their English meanings from
-            the curated 50-word deck.
+          <span id="dataset-count" class="progress-count" aria-live="polite"></span>
+        </div>
+        <div class="hero-controls">
+          <button id="new-round-button" type="button">New Round</button>
+          <p id="status-message" class="hero-status" role="status" aria-live="polite">
+            Tap one Kannada tile and one English tile to make a match.
           </p>
-          <p class="hero-note">Tap one Kannada tile, then one English tile.</p>
-        </section>
-
-        <section class="controls" aria-label="Controls and status">
-          <div class="controls-header">
-            <h2>Round Control</h2>
-            <span id="dataset-count" aria-live="polite"></span>
-          </div>
-          <p class="controls-copy">
-            Finish all 5 matches, or start a fresh round at any time.
-          </p>
-          <div class="button-row">
-            <button id="new-round-button" type="button">New Round</button>
-          </div>
-          <div class="status" role="status" aria-live="polite">
-            <h2>Current Status</h2>
-            <p id="status-message">
-              Tap one Kannada tile and one English tile to make a match.
-            </p>
-          </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <section class="board" aria-label="Word matching board">
         <div class="board-grid">
           <section class="column" aria-labelledby="kannada-column-title">
             <div class="column-header">
               <h2 id="kannada-column-title">Kannada</h2>
-              <span>Script with Devanagari support</span>
             </div>
             <div id="kannada-list" class="tile-list" aria-live="polite"></div>
           </section>
@@ -453,16 +340,11 @@
           <section class="column" aria-labelledby="english-column-title">
             <div class="column-header">
               <h2 id="english-column-title">English</h2>
-              <span>Meanings shuffled independently</span>
             </div>
             <div id="english-list" class="tile-list" aria-live="polite"></div>
           </section>
         </div>
       </section>
-
-      <p class="footer-note">
-        Single-file prototype with embedded CSS, JavaScript, and curated deck data.
-      </p>
     </main>
 
     <script>
@@ -1208,7 +1090,6 @@
           englishList: document.getElementById("english-list"),
           datasetCount: document.getElementById("dataset-count"),
           statusMessage: document.getElementById("status-message"),
-          statusPanel: document.querySelector(".status"),
           newRoundButton: document.getElementById("new-round-button")
         },
 
@@ -1343,7 +1224,6 @@
             AppConfig.roundSize +
             " pairs matched";
           UI.elements.statusMessage.textContent = UI.getStatusMessage();
-          UI.elements.statusPanel.classList.toggle("completed", State.isRoundComplete);
           UI.elements.newRoundButton.textContent = State.isRoundComplete
             ? "Play Another Round"
             : "New Round";
