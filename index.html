@@ -124,6 +124,12 @@
         gap: 5px;
       }
 
+      .summary-divider {
+        height: 1px;
+        margin: 10px 0;
+        background: rgba(191, 164, 111, 0.26);
+      }
+
       .summary-row {
         display: flex;
         justify-content: space-between;
@@ -136,6 +142,38 @@
       .summary-row strong {
         color: var(--text);
         font-weight: 700;
+      }
+
+      .mastery-block {
+        display: grid;
+        gap: 7px;
+      }
+
+      .mastery-label {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.25;
+      }
+
+      .mastery-label strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .mastery-bar {
+        overflow: hidden;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(191, 164, 111, 0.22);
+      }
+
+      .mastery-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #c38a4f 0%, #7ead76 100%);
+        transition: width 180ms ease;
       }
 
       .board {
@@ -380,6 +418,13 @@
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
             <h2 id="aggregate-summary-title" class="summary-title">All Time</h2>
             <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
+            <div class="summary-divider" aria-hidden="true"></div>
+            <div class="mastery-block" aria-live="polite">
+              <p id="mastery-label" class="mastery-label"></p>
+              <div class="mastery-bar" aria-hidden="true">
+                <div id="mastery-fill" class="mastery-fill"></div>
+              </div>
+            </div>
           </section>
         </div>
       </section>
@@ -1503,7 +1548,9 @@
           statusMessage: document.getElementById("status-message"),
           newRoundButton: document.getElementById("new-round-button"),
           sessionSummary: document.getElementById("session-summary"),
-          aggregateSummary: document.getElementById("aggregate-summary")
+          aggregateSummary: document.getElementById("aggregate-summary"),
+          masteryLabel: document.getElementById("mastery-label"),
+          masteryFill: document.getElementById("mastery-fill")
         },
 
         createTile(content) {
@@ -1634,6 +1681,38 @@
           };
         },
 
+        getMasterySummary() {
+          const masteryThreshold = {
+            seen: 3,
+            directCorrect: 2,
+            incorrect: 1
+          };
+          const deckSize = Deck.starterDataset.length;
+          const masteredCount = Deck.starterDataset.reduce((count, word) => {
+            const stat = Storage.data && Storage.data.stats
+              ? Storage.data.stats[word.id]
+              : null;
+
+            if (
+              stat &&
+              stat.seen >= masteryThreshold.seen &&
+              stat.direct_correct >= masteryThreshold.directCorrect &&
+              stat.incorrect <= masteryThreshold.incorrect
+            ) {
+              return count + 1;
+            }
+
+            return count;
+          }, 0);
+          const percent = deckSize > 0 ? Math.round((masteredCount / deckSize) * 100) : 0;
+
+          return {
+            masteredCount,
+            deckSize,
+            percent
+          };
+        },
+
         renderSummaryList(listElement, rows) {
           listElement.textContent = "";
 
@@ -1691,6 +1770,7 @@
             : "New Round";
 
           const aggregateSummary = UI.getAggregateSummary();
+          const masterySummary = UI.getMasterySummary();
 
           UI.renderSummaryList(UI.elements.sessionSummary, [
             {
@@ -1740,6 +1820,14 @@
                   : aggregateSummary.directAccuracy + "%"
             }
           ]);
+
+          UI.elements.masteryLabel.innerHTML =
+            "<strong>Mastery progress</strong> " +
+            masterySummary.masteredCount +
+            " / " +
+            masterySummary.deckSize +
+            " words mastered";
+          UI.elements.masteryFill.style.width = masterySummary.percent + "%";
         }
       };
 
