@@ -350,7 +350,13 @@
     <script>
       const AppConfig = {
         roundSize: 5,
-        incorrectResetDelayMs: 800
+        incorrectResetDelayMs: 800,
+        storageSchemaVersion: 1,
+        storageKeys: {
+          meta: "kannada_match_meta",
+          stats: "kannada_match_stats",
+          settings: "kannada_match_settings"
+        }
       };
 
       const Deck = {
@@ -1039,12 +1045,300 @@
       };
 
       const Storage = {
+        data: null,
+        isAvailable() {
+          try {
+            const probeKey = "__kannada_match_storage_probe__";
+            window.localStorage.setItem(probeKey, "1");
+            window.localStorage.removeItem(probeKey);
+            return true;
+          } catch (_error) {
+            return false;
+          }
+        },
+
+        createDefaultMeta() {
+          return {
+            schema_version: AppConfig.storageSchemaVersion,
+            last_session_at: null,
+            session_count: 0
+          };
+        },
+
+        createDefaultSettings() {
+          return {
+            show_devanagari: true
+          };
+        },
+
+        createDefaultStats() {
+          return {};
+        },
+
+        createDefaultData() {
+          return {
+            meta: Storage.createDefaultMeta(),
+            // Per-word learner stats will live here instead of being mixed into deck items.
+            stats: Storage.createDefaultStats(),
+            settings: Storage.createDefaultSettings()
+          };
+        },
+
+        readJson(key) {
+          try {
+            const rawValue = window.localStorage.getItem(key);
+
+            if (rawValue === null) {
+              return { exists: false, value: null, isValid: true };
+            }
+
+            return {
+              exists: true,
+              value: JSON.parse(rawValue),
+              isValid: true
+            };
+          } catch (_error) {
+            return { exists: true, value: null, isValid: false };
+          }
+        },
+
+        sanitizeMeta(rawMeta) {
+          const fallbackMeta = Storage.createDefaultMeta();
+
+          if (!rawMeta || typeof rawMeta !== "object" || Array.isArray(rawMeta)) {
+            return { value: fallbackMeta, didRecover: true, isCompatible: false };
+          }
+
+          if (rawMeta.schema_version !== AppConfig.storageSchemaVersion) {
+            return { value: fallbackMeta, didRecover: true, isCompatible: false };
+          }
+
+          return {
+            value: {
+              schema_version: AppConfig.storageSchemaVersion,
+              last_session_at:
+                typeof rawMeta.last_session_at === "string" ||
+                rawMeta.last_session_at === null
+                  ? rawMeta.last_session_at
+                  : null,
+              session_count:
+                Number.isInteger(rawMeta.session_count) && rawMeta.session_count >= 0
+                  ? rawMeta.session_count
+                  : 0
+            },
+            didRecover: false,
+            isCompatible: true
+          };
+        },
+
+        sanitizeSettings(rawSettings) {
+          const fallbackSettings = Storage.createDefaultSettings();
+
+          if (
+            !rawSettings ||
+            typeof rawSettings !== "object" ||
+            Array.isArray(rawSettings)
+          ) {
+            return { value: fallbackSettings, didRecover: true };
+          }
+
+          return {
+            value: {
+              show_devanagari:
+                typeof rawSettings.show_devanagari === "boolean"
+                  ? rawSettings.show_devanagari
+                  : fallbackSettings.show_devanagari
+            },
+            didRecover: false
+          };
+        },
+
+        sanitizeStats(rawStats) {
+          if (!rawStats || typeof rawStats !== "object" || Array.isArray(rawStats)) {
+            return { value: Storage.createDefaultStats(), didRecover: true };
+          }
+
+          const sanitizedStats = {};
+
+          Object.entries(rawStats).forEach(([wordId, entry]) => {
+            if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+              return;
+            }
+
+            sanitizedStats[wordId] = {
+              seen: Number.isInteger(entry.seen) && entry.seen >= 0 ? entry.seen : 0,
+              correct:
+                Number.isInteger(entry.correct) && entry.correct >= 0
+                  ? entry.correct
+                  : 0,
+              incorrect:
+                Number.isInteger(entry.incorrect) && entry.incorrect >= 0
+                  ? entry.incorrect
+                  : 0,
+              forced_completion:
+                Number.isInteger(entry.forced_completion) &&
+                entry.forced_completion >= 0
+                  ? entry.forced_completion
+                  : 0,
+              streak:
+                Number.isInteger(entry.streak) && entry.streak >= 0 ? entry.streak : 0,
+              bucket:
+                Number.isInteger(entry.bucket) && entry.bucket >= 1 ? entry.bucket : 1,
+              last_reviewed:
+                typeof entry.last_reviewed === "string" || entry.last_reviewed === null
+                  ? entry.last_reviewed
+                  : null
+            };
+          });
+
+          return { value: sanitizedStats, didRecover: false };
+        },
+
         load() {
-          return null;
+          if (!Storage.isAvailable()) {
+            Storage.data = Storage.createDefaultData();
+            return Storage.data;
+          }
+
+          const metaRecord = Storage.readJson(AppConfig.storageKeys.meta);
+          const metaResult = Storage.sanitizeMeta(metaRecord.value);
+          let didRecover =
+            !metaRecord.exists || !metaRecord.isValid || metaResult.didRecover;
+
+          let statsResult = {
+            value: Storage.createDefaultStats(),
+            didRecover: true
+          };
+          let settingsResult = {
+            value: Storage.createDefaultSettings(),
+            didRecover: true
+          };
+
+          if (metaResult.isCompatible) {
+            const statsRecord = Storage.readJson(AppConfig.storageKeys.stats);
+            const settingsRecord = Storage.readJson(AppConfig.storageKeys.settings);
+
+            statsResult = Storage.sanitizeStats(statsRecord.value);
+            settingsResult = Storage.sanitizeSettings(settingsRecord.value);
+
+            didRecover =
+              didRecover ||
+              !statsRecord.exists ||
+              !statsRecord.isValid ||
+              statsResult.didRecover ||
+              !settingsRecord.exists ||
+              !settingsRecord.isValid ||
+              settingsResult.didRecover;
+          } else {
+            didRecover = true;
+          }
+
+          Storage.data = {
+            meta: metaResult.value,
+            stats: statsResult.value,
+            settings: settingsResult.value
+          };
+
+          if (didRecover) {
+            Storage.save();
+          }
+
+          return Storage.data;
+        },
+
+        touchSession() {
+          if (!Storage.data) {
+            Storage.data = Storage.createDefaultData();
+          }
+
+          Storage.data.meta.session_count += 1;
+          Storage.data.meta.last_session_at = new Date().toISOString();
+          Storage.save();
+        },
+
+        ensureWordStat(wordId) {
+          if (!Storage.data) {
+            Storage.data = Storage.createDefaultData();
+          }
+
+          if (!Storage.data.stats[wordId]) {
+            // Keep the stat shape ready for later milestones, including recall-vs-elimination
+            // distinctions for the final forced pair.
+            Storage.data.stats[wordId] = {
+              seen: 0,
+              correct: 0,
+              incorrect: 0,
+              forced_completion: 0,
+              streak: 0,
+              bucket: 1,
+              last_reviewed: null
+            };
+          }
+
+          return Storage.data.stats[wordId];
+        },
+
+        markRoundSeen(round) {
+          if (!round) {
+            return;
+          }
+
+          round.kannadaPairs.forEach((pair) => {
+            const stat = Storage.ensureWordStat(pair.id);
+            stat.seen += 1;
+          });
+
+          Storage.save();
+        },
+
+        markIncorrectAttempt(pairIds) {
+          const reviewedAt = new Date().toISOString();
+
+          pairIds.forEach((pairId) => {
+            const stat = Storage.ensureWordStat(pairId);
+            stat.incorrect += 1;
+            stat.streak = 0;
+            stat.last_reviewed = reviewedAt;
+          });
+
+          Storage.save();
+        },
+
+        markCorrectMatch(pairId, options = {}) {
+          const stat = Storage.ensureWordStat(pairId);
+          stat.last_reviewed = new Date().toISOString();
+
+          if (options.isForcedCompletion) {
+            stat.forced_completion += 1;
+          } else {
+            stat.correct += 1;
+            stat.streak += 1;
+          }
+
+          Storage.save();
         },
 
         save() {
-          // Persistence is intentionally out of scope for this milestone.
+          if (!Storage.isAvailable() || !Storage.data) {
+            return;
+          }
+
+          try {
+            window.localStorage.setItem(
+              AppConfig.storageKeys.meta,
+              JSON.stringify(Storage.data.meta)
+            );
+            window.localStorage.setItem(
+              AppConfig.storageKeys.stats,
+              JSON.stringify(Storage.data.stats)
+            );
+            window.localStorage.setItem(
+              AppConfig.storageKeys.settings,
+              JSON.stringify(Storage.data.settings)
+            );
+          } catch (_error) {
+            // Ignore quota or availability errors so gameplay never breaks.
+          }
         }
       };
 
@@ -1081,6 +1375,7 @@
         startNewRound() {
           State.round = Deck.createRound();
           State.resetRoundUi();
+          Storage.markRoundSeen(State.round);
         }
       };
 
@@ -1238,6 +1533,12 @@
           }
 
           if (State.selectedKannadaId === State.selectedEnglishId) {
+            const isForcedCompletion =
+              State.matchedPairIds.size === AppConfig.roundSize - 1;
+
+            Storage.markCorrectMatch(State.selectedKannadaId, {
+              isForcedCompletion
+            });
             State.matchedPairIds.add(State.selectedKannadaId);
             State.clearSelections();
             State.isRoundComplete =
@@ -1251,6 +1552,10 @@
             State.selectedEnglishId
           ]);
           State.isFeedbackLocked = true;
+          Storage.markIncorrectAttempt([
+            State.selectedKannadaId,
+            State.selectedEnglishId
+          ]);
           UI.render();
 
           State.incorrectResetTimerId = window.setTimeout(() => {
@@ -1318,6 +1623,8 @@
 
         init() {
           Storage.load();
+          Storage.touchSession();
+          Storage.markRoundSeen(State.round);
           document.addEventListener("click", App.handleTileActivation);
           document.addEventListener("keydown", App.handleKeydown);
           UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
