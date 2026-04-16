@@ -96,6 +96,48 @@
         line-height: 1.32;
       }
 
+      .summary-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .summary-card {
+        padding: 10px 12px;
+        border: 1px solid rgba(191, 164, 111, 0.32);
+        border-radius: 16px;
+        background: rgba(255, 253, 249, 0.74);
+      }
+
+      .summary-title {
+        margin: 0 0 8px;
+        color: var(--text);
+        font-size: 0.86rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 5px;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.25;
+      }
+
+      .summary-row strong {
+        color: var(--text);
+        font-weight: 700;
+      }
+
       .board {
         margin-top: 12px;
         padding: 14px;
@@ -267,6 +309,10 @@
           padding: 14px 18px 16px;
         }
 
+        .summary-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
         .board-grid {
           grid-template-columns: 1fr 1fr;
           gap: 12px;
@@ -325,6 +371,16 @@
           <p id="status-message" class="hero-status" role="status" aria-live="polite">
             Tap one Kannada tile and one English tile to make a match.
           </p>
+        </div>
+        <div class="summary-grid" aria-label="Learner summaries">
+          <section class="summary-card" aria-labelledby="session-summary-title">
+            <h2 id="session-summary-title" class="summary-title">This Session</h2>
+            <div id="session-summary" class="summary-list" aria-live="polite"></div>
+          </section>
+          <section class="summary-card" aria-labelledby="aggregate-summary-title">
+            <h2 id="aggregate-summary-title" class="summary-title">All Time</h2>
+            <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
+          </section>
         </div>
       </section>
 
@@ -1351,6 +1407,13 @@
         isFeedbackLocked: false,
         isRoundComplete: false,
         incorrectResetTimerId: null,
+        sessionSummary: {
+          roundsPlayed: 0,
+          wordsSeen: 0,
+          directCorrectMatches: 0,
+          incorrectAttempts: 0,
+          forcedCompletions: 0
+        },
 
         clearSelections() {
           State.selectedKannadaId = null;
@@ -1376,6 +1439,7 @@
           State.round = Deck.createRound();
           State.resetRoundUi();
           Storage.markRoundSeen(State.round);
+          State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
         }
       };
 
@@ -1385,7 +1449,9 @@
           englishList: document.getElementById("english-list"),
           datasetCount: document.getElementById("dataset-count"),
           statusMessage: document.getElementById("status-message"),
-          newRoundButton: document.getElementById("new-round-button")
+          newRoundButton: document.getElementById("new-round-button"),
+          sessionSummary: document.getElementById("session-summary"),
+          aggregateSummary: document.getElementById("aggregate-summary")
         },
 
         createTile(content) {
@@ -1485,6 +1551,55 @@
           return State.round.englishPairs;
         },
 
+        getAggregateSummary() {
+          const allStats = Object.values(Storage.data ? Storage.data.stats : {});
+          const totalWordsSeen = allStats.reduce((sum, stat) => sum + stat.seen, 0);
+          const totalDirectCorrect = allStats.reduce(
+            (sum, stat) => sum + stat.correct,
+            0
+          );
+          const totalIncorrectWordTouches = allStats.reduce(
+            (sum, stat) => sum + stat.incorrect,
+            0
+          );
+          const totalForcedCompletions = allStats.reduce(
+            (sum, stat) => sum + stat.forced_completion,
+            0
+          );
+          const totalIncorrectAttempts = Math.floor(totalIncorrectWordTouches / 2);
+          const directAttemptBase = totalDirectCorrect + totalIncorrectAttempts;
+          const directAccuracy =
+            directAttemptBase > 0
+              ? Math.round((totalDirectCorrect / directAttemptBase) * 100)
+              : null;
+
+          return {
+            totalWordsSeen,
+            totalDirectCorrect,
+            totalIncorrectAttempts,
+            totalForcedCompletions,
+            directAccuracy
+          };
+        },
+
+        renderSummaryList(listElement, rows) {
+          listElement.textContent = "";
+
+          rows.forEach((row) => {
+            const item = document.createElement("div");
+            item.className = "summary-row";
+
+            const label = document.createElement("span");
+            label.textContent = row.label;
+
+            const value = document.createElement("strong");
+            value.textContent = row.value;
+
+            item.append(label, value);
+            listElement.appendChild(item);
+          });
+        },
+
         renderColumn(listElement, pairs, tileType) {
           listElement.textContent = "";
 
@@ -1522,6 +1637,57 @@
           UI.elements.newRoundButton.textContent = State.isRoundComplete
             ? "Play Another Round"
             : "New Round";
+
+          const aggregateSummary = UI.getAggregateSummary();
+
+          UI.renderSummaryList(UI.elements.sessionSummary, [
+            {
+              label: "Rounds played",
+              value: String(State.sessionSummary.roundsPlayed)
+            },
+            {
+              label: "Words seen",
+              value: String(State.sessionSummary.wordsSeen)
+            },
+            {
+              label: "Direct correct",
+              value: String(State.sessionSummary.directCorrectMatches)
+            },
+            {
+              label: "Incorrect attempts",
+              value: String(State.sessionSummary.incorrectAttempts)
+            },
+            {
+              label: "Forced final pairs",
+              value: String(State.sessionSummary.forcedCompletions)
+            }
+          ]);
+
+          UI.renderSummaryList(UI.elements.aggregateSummary, [
+            {
+              label: "Words seen",
+              value: String(aggregateSummary.totalWordsSeen)
+            },
+            {
+              label: "Direct correct",
+              value: String(aggregateSummary.totalDirectCorrect)
+            },
+            {
+              label: "Incorrect attempts",
+              value: String(aggregateSummary.totalIncorrectAttempts)
+            },
+            {
+              label: "Forced final pairs",
+              value: String(aggregateSummary.totalForcedCompletions)
+            },
+            {
+              label: "Direct accuracy",
+              value:
+                aggregateSummary.directAccuracy === null
+                  ? "—"
+                  : aggregateSummary.directAccuracy + "%"
+            }
+          ]);
         }
       };
 
@@ -1539,10 +1705,18 @@
             Storage.markCorrectMatch(State.selectedKannadaId, {
               isForcedCompletion
             });
+            if (isForcedCompletion) {
+              State.sessionSummary.forcedCompletions += 1;
+            } else {
+              State.sessionSummary.directCorrectMatches += 1;
+            }
             State.matchedPairIds.add(State.selectedKannadaId);
             State.clearSelections();
             State.isRoundComplete =
               State.matchedPairIds.size === AppConfig.roundSize;
+            if (State.isRoundComplete) {
+              State.sessionSummary.roundsPlayed += 1;
+            }
             UI.render();
             return;
           }
@@ -1552,6 +1726,7 @@
             State.selectedEnglishId
           ]);
           State.isFeedbackLocked = true;
+          State.sessionSummary.incorrectAttempts += 1;
           Storage.markIncorrectAttempt([
             State.selectedKannadaId,
             State.selectedEnglishId
@@ -1625,6 +1800,7 @@
           Storage.load();
           Storage.touchSession();
           Storage.markRoundSeen(State.round);
+          State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
           document.addEventListener("click", App.handleTileActivation);
           document.addEventListener("keydown", App.handleKeydown);
           UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
