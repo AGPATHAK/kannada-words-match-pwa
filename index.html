@@ -407,7 +407,7 @@
       const AppConfig = {
         roundSize: 5,
         incorrectResetDelayMs: 800,
-        storageSchemaVersion: 1,
+        storageSchemaVersion: 2,
         storageKeys: {
           meta: "kannada_match_meta",
           stats: "kannada_match_stats",
@@ -1162,11 +1162,24 @@
           const fallbackMeta = Storage.createDefaultMeta();
 
           if (!rawMeta || typeof rawMeta !== "object" || Array.isArray(rawMeta)) {
-            return { value: fallbackMeta, didRecover: true, isCompatible: false };
+            return {
+              value: fallbackMeta,
+              didRecover: true,
+              isCompatible: false,
+              sourceVersion: null
+            };
           }
 
-          if (rawMeta.schema_version !== AppConfig.storageSchemaVersion) {
-            return { value: fallbackMeta, didRecover: true, isCompatible: false };
+          if (
+            rawMeta.schema_version !== 1 &&
+            rawMeta.schema_version !== AppConfig.storageSchemaVersion
+          ) {
+            return {
+              value: fallbackMeta,
+              didRecover: true,
+              isCompatible: false,
+              sourceVersion: null
+            };
           }
 
           return {
@@ -1182,8 +1195,9 @@
                   ? rawMeta.session_count
                   : 0
             },
-            didRecover: false,
-            isCompatible: true
+            didRecover: rawMeta.schema_version !== AppConfig.storageSchemaVersion,
+            isCompatible: true,
+            sourceVersion: rawMeta.schema_version
           };
         },
 
@@ -1209,7 +1223,7 @@
           };
         },
 
-        sanitizeStats(rawStats) {
+        sanitizeStats(rawStats, sourceVersion = AppConfig.storageSchemaVersion) {
           if (!rawStats || typeof rawStats !== "object" || Array.isArray(rawStats)) {
             return { value: Storage.createDefaultStats(), didRecover: true };
           }
@@ -1223,10 +1237,14 @@
 
             sanitizedStats[wordId] = {
               seen: Number.isInteger(entry.seen) && entry.seen >= 0 ? entry.seen : 0,
-              correct:
-                Number.isInteger(entry.correct) && entry.correct >= 0
-                  ? entry.correct
-                  : 0,
+              direct_correct:
+                Number.isInteger(entry.direct_correct) && entry.direct_correct >= 0
+                  ? entry.direct_correct
+                  : sourceVersion === 1 &&
+                      Number.isInteger(entry.correct) &&
+                      entry.correct >= 0
+                    ? entry.correct
+                    : 0,
               incorrect:
                 Number.isInteger(entry.incorrect) && entry.incorrect >= 0
                   ? entry.incorrect
@@ -1240,6 +1258,25 @@
                 Number.isInteger(entry.streak) && entry.streak >= 0 ? entry.streak : 0,
               bucket:
                 Number.isInteger(entry.bucket) && entry.bucket >= 1 ? entry.bucket : 1,
+              last_seen_at:
+                typeof entry.last_seen_at === "string" || entry.last_seen_at === null
+                  ? entry.last_seen_at
+                  : null,
+              last_direct_correct_at:
+                typeof entry.last_direct_correct_at === "string" ||
+                entry.last_direct_correct_at === null
+                  ? entry.last_direct_correct_at
+                  : null,
+              last_incorrect_at:
+                typeof entry.last_incorrect_at === "string" ||
+                entry.last_incorrect_at === null
+                  ? entry.last_incorrect_at
+                  : null,
+              last_forced_completion_at:
+                typeof entry.last_forced_completion_at === "string" ||
+                entry.last_forced_completion_at === null
+                  ? entry.last_forced_completion_at
+                  : null,
               last_reviewed:
                 typeof entry.last_reviewed === "string" || entry.last_reviewed === null
                   ? entry.last_reviewed
@@ -1247,7 +1284,10 @@
             };
           });
 
-          return { value: sanitizedStats, didRecover: false };
+          return {
+            value: sanitizedStats,
+            didRecover: sourceVersion !== AppConfig.storageSchemaVersion
+          };
         },
 
         load() {
@@ -1260,6 +1300,7 @@
           const metaResult = Storage.sanitizeMeta(metaRecord.value);
           let didRecover =
             !metaRecord.exists || !metaRecord.isValid || metaResult.didRecover;
+          const sourceVersion = metaResult.sourceVersion || AppConfig.storageSchemaVersion;
 
           let statsResult = {
             value: Storage.createDefaultStats(),
@@ -1274,7 +1315,7 @@
             const statsRecord = Storage.readJson(AppConfig.storageKeys.stats);
             const settingsRecord = Storage.readJson(AppConfig.storageKeys.settings);
 
-            statsResult = Storage.sanitizeStats(statsRecord.value);
+            statsResult = Storage.sanitizeStats(statsRecord.value, sourceVersion);
             settingsResult = Storage.sanitizeSettings(settingsRecord.value);
 
             didRecover =
@@ -1322,11 +1363,15 @@
             // distinctions for the final forced pair.
             Storage.data.stats[wordId] = {
               seen: 0,
-              correct: 0,
+              direct_correct: 0,
               incorrect: 0,
               forced_completion: 0,
               streak: 0,
               bucket: 1,
+              last_seen_at: null,
+              last_direct_correct_at: null,
+              last_incorrect_at: null,
+              last_forced_completion_at: null,
               last_reviewed: null
             };
           }
@@ -1339,9 +1384,12 @@
             return;
           }
 
+          const seenAt = new Date().toISOString();
+
           round.kannadaPairs.forEach((pair) => {
             const stat = Storage.ensureWordStat(pair.id);
             stat.seen += 1;
+            stat.last_seen_at = seenAt;
           });
 
           Storage.save();
@@ -1354,6 +1402,7 @@
             const stat = Storage.ensureWordStat(pairId);
             stat.incorrect += 1;
             stat.streak = 0;
+            stat.last_incorrect_at = reviewedAt;
             stat.last_reviewed = reviewedAt;
           });
 
@@ -1362,13 +1411,16 @@
 
         markCorrectMatch(pairId, options = {}) {
           const stat = Storage.ensureWordStat(pairId);
-          stat.last_reviewed = new Date().toISOString();
+          const reviewedAt = new Date().toISOString();
+          stat.last_reviewed = reviewedAt;
 
           if (options.isForcedCompletion) {
             stat.forced_completion += 1;
+            stat.last_forced_completion_at = reviewedAt;
           } else {
-            stat.correct += 1;
+            stat.direct_correct += 1;
             stat.streak += 1;
+            stat.last_direct_correct_at = reviewedAt;
           }
 
           Storage.save();
@@ -1555,7 +1607,7 @@
           const allStats = Object.values(Storage.data ? Storage.data.stats : {});
           const totalWordsSeen = allStats.reduce((sum, stat) => sum + stat.seen, 0);
           const totalDirectCorrect = allStats.reduce(
-            (sum, stat) => sum + stat.correct,
+            (sum, stat) => sum + stat.direct_correct,
             0
           );
           const totalIncorrectWordTouches = allStats.reduce(
