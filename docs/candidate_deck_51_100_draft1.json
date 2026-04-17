@@ -1,0 +1,502 @@
+[
+  {
+    "id": "pustaka",
+    "kannada": "ಪುಸ್ತಕ",
+    "devanagari": "पुस्तक",
+    "english": "book",
+    "category": "school",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "shaale",
+    "kannada": "ಶಾಲೆ",
+    "devanagari": "शाले",
+    "english": "school",
+    "category": "school",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "pen",
+    "kannada": "ಪೆನ್",
+    "devanagari": "पेन",
+    "english": "pen",
+    "category": "school",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "pencil",
+    "kannada": "ಪೆನ್ಸಿಲ್",
+    "devanagari": "पेन्सिल",
+    "english": "pencil",
+    "category": "school",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "cheela",
+    "kannada": "ಚೀಲ",
+    "devanagari": "चील",
+    "english": "bag",
+    "category": "daily_objects",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "keeli",
+    "kannada": "ಕೀಲಿ",
+    "devanagari": "कीलि",
+    "english": "key",
+    "category": "daily_objects",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "bus",
+    "kannada": "ಬಸ್",
+    "devanagari": "बस",
+    "english": "bus",
+    "category": "transport",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "transport"]
+  },
+  {
+    "id": "saikal",
+    "kannada": "ಸೈಕಲ್",
+    "devanagari": "सैकल",
+    "english": "bicycle",
+    "category": "transport",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "transport"]
+  },
+  {
+    "id": "raste",
+    "kannada": "ರಸ್ತೆ",
+    "devanagari": "रस्ते",
+    "english": "road",
+    "category": "transport",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "angadi",
+    "kannada": "ಅಂಗಡಿ",
+    "devanagari": "अंगडि",
+    "english": "shop",
+    "category": "places",
+    "difficulty_band": "extended",
+    "intro_stage": 6,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "tatte",
+    "kannada": "ತಟ್ಟೆ",
+    "devanagari": "तट्टे",
+    "english": "plate",
+    "category": "home",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "chamacha",
+    "kannada": "ಚಮಚ",
+    "devanagari": "चमच",
+    "english": "spoon",
+    "category": "home",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "paatre",
+    "kannada": "ಪಾತ್ರೆ",
+    "devanagari": "पात्रे",
+    "english": "utensil",
+    "category": "home",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "baatali",
+    "kannada": "ಬಾಟಲಿ",
+    "devanagari": "बाटलि",
+    "english": "bottle",
+    "category": "home",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "sabbu",
+    "kannada": "ಸಬ್ಬು",
+    "devanagari": "सब्बु",
+    "english": "soap",
+    "category": "daily_objects",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "tavel",
+    "kannada": "ಟವೆಲ್",
+    "devanagari": "टवेल",
+    "english": "towel",
+    "category": "daily_objects",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "batte",
+    "kannada": "ಬಟ್ಟೆ",
+    "devanagari": "बट्टे",
+    "english": "clothes",
+    "category": "clothing",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "wearable"]
+  },
+  {
+    "id": "chappali",
+    "kannada": "ಚಪ್ಪಲಿ",
+    "devanagari": "चप्पलि",
+    "english": "slippers",
+    "category": "clothing",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "wearable"]
+  },
+  {
+    "id": "topi",
+    "kannada": "ಟೋಪಿ",
+    "devanagari": "टोपि",
+    "english": "cap",
+    "category": "clothing",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "wearable"]
+  },
+  {
+    "id": "kannadi",
+    "kannada": "ಕನ್ನಡಿ",
+    "devanagari": "कन्नडि",
+    "english": "mirror",
+    "category": "home",
+    "difficulty_band": "extended",
+    "intro_stage": 7,
+    "tags": ["inanimate", "object"]
+  },
+  {
+    "id": "shikshaka",
+    "kannada": "ಶಿಕ್ಷಕ",
+    "devanagari": "शिक्षक",
+    "english": "teacher",
+    "category": "people",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["animate", "human"]
+  },
+  {
+    "id": "vidyarthi",
+    "kannada": "ವಿದ್ಯಾರ್ಥಿ",
+    "devanagari": "विद्यार्थि",
+    "english": "student",
+    "category": "people",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["animate", "human"]
+  },
+  {
+    "id": "daktar",
+    "kannada": "ಡಾಕ್ಟರ್",
+    "devanagari": "डाक्टर",
+    "english": "doctor",
+    "category": "people",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["animate", "human"]
+  },
+  {
+    "id": "raita",
+    "kannada": "ರೈತ",
+    "devanagari": "रैत",
+    "english": "farmer",
+    "category": "people",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["animate", "human"]
+  },
+  {
+    "id": "atithi",
+    "kannada": "ಅತಿಥಿ",
+    "devanagari": "अतिथि",
+    "english": "guest",
+    "category": "people",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["animate", "human"]
+  },
+  {
+    "id": "aaspatre",
+    "kannada": "ಆಸ್ಪತ್ರೆ",
+    "devanagari": "आस्पत्रे",
+    "english": "hospital",
+    "category": "places",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "devasthaana",
+    "kannada": "ದೇವಸ್ಥಾನ",
+    "devanagari": "देवस्थान",
+    "english": "temple",
+    "category": "places",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "udyana",
+    "kannada": "ಉದ್ಯಾನ",
+    "devanagari": "उद्यान",
+    "english": "park",
+    "category": "places",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "ooru",
+    "kannada": "ಊರು",
+    "devanagari": "ऊरु",
+    "english": "village",
+    "category": "places",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["inanimate", "place"]
+  },
+  {
+    "id": "poliis",
+    "kannada": "ಪೊಲೀಸ್",
+    "devanagari": "पोलीस",
+    "english": "police officer",
+    "category": "people",
+    "difficulty_band": "extended",
+    "intro_stage": 8,
+    "tags": ["animate", "human"]
+  },
+  {
+    "id": "bekku",
+    "kannada": "ಬೆಕ್ಕು",
+    "devanagari": "बेक्कु",
+    "english": "cat",
+    "category": "animal",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["animate", "animal"]
+  },
+  {
+    "id": "hasu",
+    "kannada": "ಹಸು",
+    "devanagari": "हसु",
+    "english": "cow",
+    "category": "animal",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["animate", "animal"]
+  },
+  {
+    "id": "meenu",
+    "kannada": "ಮೀನು",
+    "devanagari": "मीनु",
+    "english": "fish",
+    "category": "animal",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["animate", "animal"]
+  },
+  {
+    "id": "kudure",
+    "kannada": "ಕುದುರೆ",
+    "devanagari": "कुदुरे",
+    "english": "horse",
+    "category": "animal",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["animate", "animal"]
+  },
+  {
+    "id": "ele",
+    "kannada": "ಎಲೆ",
+    "devanagari": "एले",
+    "english": "leaf",
+    "category": "nature",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["nature", "concrete"]
+  },
+  {
+    "id": "hullu",
+    "kannada": "ಹುಲ್ಲು",
+    "devanagari": "हुल्लु",
+    "english": "grass",
+    "category": "nature",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["nature", "concrete"]
+  },
+  {
+    "id": "nadi",
+    "kannada": "ನದಿ",
+    "devanagari": "नदि",
+    "english": "river",
+    "category": "nature",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["nature", "place"]
+  },
+  {
+    "id": "betta",
+    "kannada": "ಬೆಟ್ಟ",
+    "devanagari": "बेट्ट",
+    "english": "hill",
+    "category": "nature",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["nature", "place"]
+  },
+  {
+    "id": "mukha",
+    "kannada": "ಮುಖ",
+    "devanagari": "मुख",
+    "english": "face",
+    "category": "body",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["body", "concrete"]
+  },
+  {
+    "id": "koodalu",
+    "kannada": "ಕೂದಲು",
+    "devanagari": "कूदलु",
+    "english": "hair",
+    "category": "body",
+    "difficulty_band": "extended",
+    "intro_stage": 9,
+    "tags": ["body", "concrete"]
+  },
+  {
+    "id": "dina",
+    "kannada": "ದಿನ",
+    "devanagari": "दिन",
+    "english": "day",
+    "category": "time",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["time", "daily"]
+  },
+  {
+    "id": "raatri",
+    "kannada": "ರಾತ್ರಿ",
+    "devanagari": "रात्रि",
+    "english": "night",
+    "category": "time",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["time", "daily"]
+  },
+  {
+    "id": "beligge",
+    "kannada": "ಬೆಳಿಗ್ಗೆ",
+    "devanagari": "बेळिग्गे",
+    "english": "morning",
+    "category": "time",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["time", "daily"]
+  },
+  {
+    "id": "sanje",
+    "kannada": "ಸಂಜೆ",
+    "devanagari": "संजे",
+    "english": "evening",
+    "category": "time",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["time", "daily"]
+  },
+  {
+    "id": "samaya",
+    "kannada": "ಸಮಯ",
+    "devanagari": "समय",
+    "english": "time",
+    "category": "time",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["time", "daily"]
+  },
+  {
+    "id": "hana",
+    "kannada": "ಹಣ",
+    "devanagari": "हण",
+    "english": "money",
+    "category": "daily_life",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["daily", "concrete"]
+  },
+  {
+    "id": "hogu",
+    "kannada": "ಹೋಗು",
+    "devanagari": "होगु",
+    "english": "go",
+    "category": "verbs",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["verb", "daily"]
+  },
+  {
+    "id": "baa",
+    "kannada": "ಬಾ",
+    "devanagari": "बा",
+    "english": "come",
+    "category": "verbs",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["verb", "daily"]
+  },
+  {
+    "id": "tinnu",
+    "kannada": "ತಿನ್ನು",
+    "devanagari": "तिन्नु",
+    "english": "eat",
+    "category": "verbs",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["verb", "daily"]
+  },
+  {
+    "id": "malagu",
+    "kannada": "ಮಲಗು",
+    "devanagari": "मलगु",
+    "english": "sleep",
+    "category": "verbs",
+    "difficulty_band": "extended",
+    "intro_stage": 10,
+    "tags": ["verb", "daily"]
+  }
+]
