@@ -85,12 +85,21 @@
       .hero-controls {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 12px;
         margin-top: 12px;
       }
 
+      .hero-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+
       .hero-status {
         min-width: 0;
+        flex: 1 1 280px;
         color: var(--muted);
         font-size: 0.92rem;
         line-height: 1.32;
@@ -374,6 +383,22 @@
       .button-secondary {
         color: var(--accent);
         background: linear-gradient(180deg, #f6e6d1 0%, var(--accent-soft) 100%);
+        box-shadow: none;
+      }
+
+      .button-subtle {
+        padding: 8px 12px;
+        color: var(--muted);
+        border-color: rgba(191, 164, 111, 0.28);
+        background: rgba(255, 251, 245, 0.7);
+        box-shadow: none;
+      }
+
+      .button-subtle:hover {
+        color: var(--text);
+        border-color: rgba(157, 92, 47, 0.18);
+        background: rgba(255, 248, 240, 0.9);
+        box-shadow: 0 4px 10px rgba(157, 92, 47, 0.08);
       }
 
       @media (min-width: 760px) {
@@ -425,6 +450,11 @@
           gap: 10px;
         }
 
+        .hero-actions {
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
         .mode-row {
           width: 100%;
           margin-top: 8px;
@@ -447,7 +477,12 @@
           <span id="dataset-count" class="progress-count" aria-live="polite"></span>
         </div>
         <div class="hero-controls">
-          <button id="new-round-button" type="button">New Round</button>
+          <div class="hero-actions">
+            <button id="new-round-button" type="button">New Round</button>
+            <button id="reset-progress-button" class="button-subtle" type="button">
+              Reset progress
+            </button>
+          </div>
           <p id="status-message" class="hero-status" role="status" aria-live="polite">
             Tap one Kannada tile and one English tile to make a match.
           </p>
@@ -2415,6 +2450,22 @@
           );
         },
 
+        clearProgress() {
+          Storage.data = Storage.createDefaultData();
+
+          if (!Storage.isAvailable()) {
+            return;
+          }
+
+          try {
+            window.localStorage.removeItem(AppConfig.storageKeys.meta);
+            window.localStorage.removeItem(AppConfig.storageKeys.stats);
+            window.localStorage.removeItem(AppConfig.storageKeys.settings);
+          } catch (_error) {
+            // Ignore availability errors so reset never breaks the app.
+          }
+        },
+
         save() {
           if (!Storage.isAvailable() || !Storage.data) {
             return;
@@ -2492,6 +2543,7 @@
           datasetCount: document.getElementById("dataset-count"),
           statusMessage: document.getElementById("status-message"),
           newRoundButton: document.getElementById("new-round-button"),
+          resetProgressButton: document.getElementById("reset-progress-button"),
           modeButtons: Array.from(document.querySelectorAll(".mode-button")),
           aggregateSummary: document.getElementById("aggregate-summary"),
           masteryLabel: document.getElementById("mastery-label"),
@@ -2867,10 +2919,24 @@
         setRoundSource(roundSource) {
           State.roundSource = roundSource;
           Engine.startNewRound();
+        },
+
+        resetProgress() {
+          const shouldReset = window.confirm(
+            "Reset all Kannada Words Match progress on this device and start fresh?"
+          );
+
+          if (!shouldReset) {
+            return;
+          }
+
+          Storage.clearProgress();
+          App.init();
         }
       };
 
       const App = {
+        didInit: false,
         handleTileActivation(event) {
           const tile = event.target.closest(".tile");
 
@@ -2909,15 +2975,33 @@
         init() {
           Storage.load();
           Storage.touchSession();
+          State.roundSource = AppConfig.defaultRoundSource;
           State.round = Deck.createRound(State.roundSource);
+          State.resetRoundUi();
+          State.sessionSummary = {
+            roundsPlayed: 0,
+            wordsSeen: 0,
+            directCorrectMatches: 0,
+            incorrectAttempts: 0,
+            forcedCompletions: 0
+          };
           Storage.markRoundSeen(State.round);
           State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
-          document.addEventListener("click", App.handleTileActivation);
-          document.addEventListener("keydown", App.handleKeydown);
-          UI.elements.modeButtons.forEach((button) => {
-            button.addEventListener("click", App.handleModeChange);
-          });
-          UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
+
+          if (!App.didInit) {
+            document.addEventListener("click", App.handleTileActivation);
+            document.addEventListener("keydown", App.handleKeydown);
+            UI.elements.modeButtons.forEach((button) => {
+              button.addEventListener("click", App.handleModeChange);
+            });
+            UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
+            UI.elements.resetProgressButton.addEventListener(
+              "click",
+              Engine.resetProgress
+            );
+            App.didInit = true;
+          }
+
           UI.render();
         }
       };
