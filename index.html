@@ -97,29 +97,36 @@
       }
 
       .mode-row {
-        display: flex;
+        display: inline-flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
         margin-top: 10px;
+        padding: 6px;
+        border: 1px solid rgba(191, 164, 111, 0.28);
+        border-radius: 999px;
+        background: rgba(255, 251, 245, 0.72);
       }
 
       .mode-button {
         min-height: 34px;
-        padding: 7px 12px;
-        border-color: rgba(191, 164, 111, 0.38);
+        padding: 7px 13px;
+        border-color: transparent;
         color: var(--accent);
-        background: linear-gradient(180deg, #f8ebda 0%, #f2dfc9 100%);
+        background: transparent;
         box-shadow: none;
+        white-space: nowrap;
       }
 
       .mode-button:hover {
-        box-shadow: 0 6px 12px rgba(157, 92, 47, 0.12);
+        background: rgba(242, 223, 201, 0.72);
+        box-shadow: 0 4px 10px rgba(157, 92, 47, 0.08);
       }
 
       .mode-button.is-active {
         color: #fffaf2;
-        border-color: rgba(255, 250, 242, 0.24);
+        border-color: rgba(255, 250, 242, 0.16);
         background: linear-gradient(180deg, #ad6938 0%, var(--accent) 100%);
+        box-shadow: 0 7px 14px rgba(157, 92, 47, 0.16);
       }
 
       .summary-grid {
@@ -422,7 +429,15 @@
         }
 
         .mode-row {
+          width: 100%;
           margin-top: 8px;
+          border-radius: 18px;
+        }
+
+        .mode-button {
+          flex: 1 1 calc(50% - 6px);
+          justify-content: center;
+          text-align: center;
         }
       }
     </style>
@@ -447,7 +462,7 @@
             type="button"
             data-round-source="smart_mix"
           >
-            Daily Mix
+            Mixed Practice
           </button>
           <button
             id="mode-mistakes"
@@ -455,7 +470,7 @@
             type="button"
             data-round-source="mistakes"
           >
-            Mistakes
+            Recent Mistakes
           </button>
           <button
             id="mode-weak-words"
@@ -1749,8 +1764,8 @@
 
         getStatusMessage() {
           const roundSourceLabelMap = {
-            smart_mix: "Daily Mix",
-            mistakes: "Mistakes",
+            smart_mix: "Mixed Practice",
+            mistakes: "Recent Mistakes",
             weak_words: "Weak Words"
           };
 
