@@ -96,6 +96,32 @@
         line-height: 1.32;
       }
 
+      .mode-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .mode-button {
+        min-height: 34px;
+        padding: 7px 12px;
+        border-color: rgba(191, 164, 111, 0.38);
+        color: var(--accent);
+        background: linear-gradient(180deg, #f8ebda 0%, #f2dfc9 100%);
+        box-shadow: none;
+      }
+
+      .mode-button:hover {
+        box-shadow: 0 6px 12px rgba(157, 92, 47, 0.12);
+      }
+
+      .mode-button.is-active {
+        color: #fffaf2;
+        border-color: rgba(255, 250, 242, 0.24);
+        background: linear-gradient(180deg, #ad6938 0%, var(--accent) 100%);
+      }
+
       .summary-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -394,6 +420,10 @@
         .hero-controls {
           gap: 10px;
         }
+
+        .mode-row {
+          margin-top: 8px;
+        }
       }
     </style>
   </head>
@@ -409,6 +439,32 @@
           <p id="status-message" class="hero-status" role="status" aria-live="polite">
             Tap one Kannada tile and one English tile to make a match.
           </p>
+        </div>
+        <div class="mode-row" aria-label="Practice mode">
+          <button
+            id="mode-smart-mix"
+            class="mode-button"
+            type="button"
+            data-round-source="smart_mix"
+          >
+            Daily Mix
+          </button>
+          <button
+            id="mode-mistakes"
+            class="mode-button"
+            type="button"
+            data-round-source="mistakes"
+          >
+            Mistakes
+          </button>
+          <button
+            id="mode-weak-words"
+            class="mode-button"
+            type="button"
+            data-round-source="weak_words"
+          >
+            Weak Words
+          </button>
         </div>
         <div class="summary-grid" aria-label="Learner summaries">
           <section class="summary-card" aria-labelledby="session-summary-title">
@@ -1147,13 +1203,18 @@
               (stat.incorrect > 0 || stat.direct_correct < 2)
             );
           });
+          const mistakesWords = allWords.filter((word) => {
+            const stat = statsByWordId[word.id];
+            return stat && stat.incorrect > 0;
+          });
           const weakWords = allWords.filter((word) => {
             const stat = statsByWordId[word.id];
 
             return (
               stat &&
-              (stat.incorrect >= 2 ||
-                (stat.seen >= 2 && stat.direct_correct === 0) ||
+              (stat.bucket <= 2 ||
+                stat.incorrect > 0 ||
+                (stat.seen >= 2 && stat.direct_correct < 2) ||
                 stat.forced_completion >= 2)
             );
           });
@@ -1165,9 +1226,11 @@
             full_deck: allWords,
             unseen: unseenWords,
             review_ready: reviewReadyWords,
+            mistakes: mistakesWords,
             weak_words: weakWords,
             smart_mix: uniqueById([
               ...reviewReadyWords,
+              ...mistakesWords,
               ...unseenWords,
               ...weakWords
             ])
@@ -1627,6 +1690,7 @@
           datasetCount: document.getElementById("dataset-count"),
           statusMessage: document.getElementById("status-message"),
           newRoundButton: document.getElementById("new-round-button"),
+          modeButtons: Array.from(document.querySelectorAll(".mode-button")),
           sessionSummary: document.getElementById("session-summary"),
           aggregateSummary: document.getElementById("aggregate-summary"),
           masteryLabel: document.getElementById("mastery-label"),
@@ -1684,6 +1748,12 @@
         },
 
         getStatusMessage() {
+          const roundSourceLabelMap = {
+            smart_mix: "Daily Mix",
+            mistakes: "Mistakes",
+            weak_words: "Weak Words"
+          };
+
           if (State.isRoundComplete) {
             return "Round complete. All 5 pairs are matched. Start a new round when you are ready.";
           }
@@ -1704,7 +1774,10 @@
             return "English selected. Now choose the matching Kannada word.";
           }
 
-          return "Tap one Kannada tile and one English tile to make a match.";
+          return (
+            roundSourceLabelMap[State.roundSource] +
+            " mode. Tap one Kannada tile and one English tile to make a match."
+          );
         },
 
         getTileMeta(tileType, pairId) {
@@ -1848,6 +1921,12 @@
           UI.elements.newRoundButton.textContent = State.isRoundComplete
             ? "Play Another Round"
             : "New Round";
+          UI.elements.modeButtons.forEach((button) => {
+            button.classList.toggle(
+              "is-active",
+              button.dataset.roundSource === State.roundSource
+            );
+          });
 
           const aggregateSummary = UI.getAggregateSummary();
           const masterySummary = UI.getMasterySummary();
@@ -1987,6 +2066,11 @@
           State.startNewRound();
           Storage.save();
           UI.render();
+        },
+
+        setRoundSource(roundSource) {
+          State.roundSource = roundSource;
+          Engine.startNewRound();
         }
       };
 
@@ -2016,6 +2100,16 @@
           Engine.selectTile(tile.dataset.tileType, tile.dataset.pairId);
         },
 
+        handleModeChange(event) {
+          const trigger = event.target.closest("[data-round-source]");
+
+          if (!trigger) {
+            return;
+          }
+
+          Engine.setRoundSource(trigger.dataset.roundSource);
+        },
+
         init() {
           Storage.load();
           Storage.touchSession();
@@ -2024,6 +2118,9 @@
           State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
           document.addEventListener("click", App.handleTileActivation);
           document.addEventListener("keydown", App.handleKeydown);
+          UI.elements.modeButtons.forEach((button) => {
+            button.addEventListener("click", App.handleModeChange);
+          });
           UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
           UI.render();
         }
