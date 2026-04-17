@@ -520,6 +520,11 @@
         defaultRoundSource: "smart_mix",
         initialActiveIntroStage: 5,
         stageUnlockMasteredWordsRequired: 6,
+        smartMixTargets: {
+          reviewReady: 2,
+          weakWords: 2,
+          newWords: 1
+        },
         leitnerBucketCount: 5,
         leitnerPromotionStreak: 2,
         storageKeys: {
@@ -1904,6 +1909,61 @@
           );
         },
 
+        takeUniqueWords(sourceWords, selectedWords, targetCount) {
+          if (targetCount <= 0) {
+            return [];
+          }
+
+          const selectedIds = new Set(selectedWords.map((word) => word.id));
+
+          return Deck.shuffle(sourceWords)
+            .filter((word) => !selectedIds.has(word.id))
+            .slice(0, targetCount);
+        },
+
+        buildSmartMixRoundPool(poolParts) {
+          const selectedWords = [];
+
+          const addWords = (sourceWords, targetCount) => {
+            const nextWords = Deck.takeUniqueWords(
+              sourceWords,
+              selectedWords,
+              targetCount
+            );
+
+            selectedWords.push(...nextWords);
+          };
+
+          addWords(poolParts.reviewReadyWords, AppConfig.smartMixTargets.reviewReady);
+          addWords(poolParts.weakWords, AppConfig.smartMixTargets.weakWords);
+
+          const remainingSlotsBeforeNewWords = Math.max(
+            0,
+            AppConfig.roundSize - selectedWords.length
+          );
+          addWords(
+            poolParts.unseenWords,
+            Math.min(
+              AppConfig.smartMixTargets.newWords,
+              remainingSlotsBeforeNewWords
+            )
+          );
+
+          if (selectedWords.length < AppConfig.roundSize) {
+            addWords(
+              [
+                ...poolParts.reviewReadyWords,
+                ...poolParts.weakWords,
+                ...poolParts.unseenWords,
+                ...poolParts.activeWords
+              ],
+              AppConfig.roundSize - selectedWords.length
+            );
+          }
+
+          return selectedWords;
+        },
+
         getWordPool(roundSource = AppConfig.defaultRoundSource) {
           const allWords = Deck.starterDataset;
           const activeWords = Deck.getActiveLearningWords();
@@ -1941,18 +2001,20 @@
           const uniqueById = (words) =>
             Array.from(new Map(words.map((word) => [word.id, word])).values());
 
+          const smartMixWords = Deck.buildSmartMixRoundPool({
+            activeWords,
+            unseenWords,
+            reviewReadyWords,
+            weakWords
+          });
+
           const poolMap = {
             full_deck: activeWords,
             unseen: unseenWords,
             review_ready: reviewReadyWords,
             mistakes: mistakesWords,
             weak_words: weakWords,
-            smart_mix: uniqueById([
-              ...reviewReadyWords,
-              ...mistakesWords,
-              ...unseenWords,
-              ...weakWords
-            ])
+            smart_mix: uniqueById(smartMixWords)
           };
 
           const selectedPool = poolMap[roundSource] || poolMap.full_deck;
