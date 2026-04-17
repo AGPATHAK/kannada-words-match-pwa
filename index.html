@@ -480,7 +480,7 @@
         </div>
         <div class="summary-grid" aria-label="Learner summaries">
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
-            <h2 id="aggregate-summary-title" class="summary-title">Progress</h2>
+            <h2 id="aggregate-summary-title" class="summary-title">Learning Progress</h2>
             <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
             <div class="summary-divider" aria-hidden="true"></div>
             <div class="mastery-block" aria-live="polite">
@@ -535,7 +535,7 @@
       };
 
       const Deck = {
-        starterDataset: [
+        curatedDeck: [
             {
               "id": "mane",
               "kannada": "ಮನೆ",
@@ -1852,14 +1852,14 @@
         },
 
         getMaxIntroStage() {
-          return Deck.starterDataset.reduce(
+          return Deck.curatedDeck.reduce(
             (highestStage, word) => Math.max(highestStage, word.intro_stage || 1),
             1
           );
         },
 
         getStageWords(stage) {
-          return Deck.starterDataset.filter((word) => (word.intro_stage || 1) === stage);
+          return Deck.curatedDeck.filter((word) => (word.intro_stage || 1) === stage);
         },
 
         getRequiredMasteredCountForStage(stage) {
@@ -1904,7 +1904,7 @@
         getActiveLearningWords() {
           const highestActiveStage = Deck.getHighestActiveIntroStage();
 
-          return Deck.starterDataset.filter(
+          return Deck.curatedDeck.filter(
             (word) => (word.intro_stage || 1) <= highestActiveStage
           );
         },
@@ -1965,7 +1965,7 @@
         },
 
         getWordPool(roundSource = AppConfig.defaultRoundSource) {
-          const allWords = Deck.starterDataset;
+          const allWords = Deck.curatedDeck;
           const activeWords = Deck.getActiveLearningWords();
           const statsByWordId = Storage.data ? Storage.data.stats : {};
 
@@ -2664,8 +2664,8 @@
         },
 
         getMasterySummary() {
-          const deckSize = Deck.starterDataset.length;
-          const masteredCount = Deck.starterDataset.reduce((count, word) => {
+          const deckSize = Deck.curatedDeck.length;
+          const masteredCount = Deck.curatedDeck.reduce((count, word) => {
             const stat = Storage.data && Storage.data.stats
               ? Storage.data.stats[word.id]
               : null;
@@ -2753,22 +2753,22 @@
 
           UI.renderSummaryList(UI.elements.aggregateSummary, [
             {
-              label: "Active stages",
+              label: "Stages active",
               value: stageIntroductionSummary.activeStageLabel
             },
             {
-              label: "Words explored",
+              label: "Words seen",
               value:
                 String(aggregateSummary.uniqueWordsSeen) +
                 " / " +
                 String(masterySummary.deckSize)
             },
             {
-              label: "Active matches",
+              label: "Direct recalls",
               value: String(aggregateSummary.totalDirectCorrect)
             },
             {
-              label: "Active match rate",
+              label: "Recall rate",
               value:
                 aggregateSummary.directAccuracy === null
                   ? "—"
@@ -2777,7 +2777,7 @@
           ]);
 
           UI.elements.masteryLabel.innerHTML =
-            "<strong>Mastery progress</strong> " +
+            "<strong>Mastery</strong> " +
             masterySummary.masteredCount +
             " / " +
             masterySummary.deckSize +
