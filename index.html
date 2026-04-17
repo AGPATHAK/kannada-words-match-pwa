@@ -453,6 +453,7 @@
         roundSize: 5,
         incorrectResetDelayMs: 800,
         storageSchemaVersion: 2,
+        defaultRoundSource: "smart_mix",
         storageKeys: {
           meta: "kannada_match_meta",
           stats: "kannada_match_stats",
@@ -1127,11 +1128,68 @@
           return copy;
         },
 
-        createRound() {
-          const kannadaPairs = Deck.shuffle(Deck.starterDataset).slice(
-            0,
-            AppConfig.roundSize
-          );
+        getWordPool(roundSource = AppConfig.defaultRoundSource) {
+          const allWords = Deck.starterDataset;
+          const statsByWordId = Storage.data ? Storage.data.stats : {};
+
+          const unseenWords = allWords.filter((word) => {
+            const stat = statsByWordId[word.id];
+            return !stat || stat.seen === 0;
+          });
+          const reviewReadyWords = allWords.filter((word) => {
+            const stat = statsByWordId[word.id];
+
+            return (
+              stat &&
+              stat.seen >= 2 &&
+              (stat.incorrect > 0 || stat.direct_correct < 2)
+            );
+          });
+          const weakWords = allWords.filter((word) => {
+            const stat = statsByWordId[word.id];
+
+            return (
+              stat &&
+              (stat.incorrect >= 2 ||
+                (stat.seen >= 2 && stat.direct_correct === 0) ||
+                stat.forced_completion >= 2)
+            );
+          });
+
+          const uniqueById = (words) =>
+            Array.from(new Map(words.map((word) => [word.id, word])).values());
+
+          const poolMap = {
+            full_deck: allWords,
+            unseen: unseenWords,
+            review_ready: reviewReadyWords,
+            weak_words: weakWords,
+            smart_mix: uniqueById([
+              ...reviewReadyWords,
+              ...unseenWords,
+              ...weakWords
+            ])
+          };
+
+          const selectedPool = poolMap[roundSource] || poolMap.full_deck;
+
+          if (selectedPool.length >= AppConfig.roundSize) {
+            return selectedPool;
+          }
+
+          const fallbackPool = uniqueById([...selectedPool, ...allWords]);
+
+          if (fallbackPool.length >= AppConfig.roundSize) {
+            return fallbackPool;
+          }
+
+          return allWords;
+        },
+
+        createRoundFromPool(pool) {
+          const sourcePool =
+            pool && pool.length > 0 ? pool : Deck.getWordPool("full_deck");
+          const kannadaPairs = Deck.shuffle(sourcePool).slice(0, AppConfig.roundSize);
           let englishPairs = Deck.shuffle(kannadaPairs);
 
           while (
@@ -1142,6 +1200,10 @@
           }
 
           return { kannadaPairs, englishPairs };
+        },
+
+        createRound(roundSource = AppConfig.defaultRoundSource) {
+          return Deck.createRoundFromPool(Deck.getWordPool(roundSource));
         }
       };
 
@@ -1496,7 +1558,8 @@
       };
 
       const State = {
-        round: Deck.createRound(),
+        roundSource: AppConfig.defaultRoundSource,
+        round: Deck.createRound(AppConfig.defaultRoundSource),
         selectedKannadaId: null,
         selectedEnglishId: null,
         matchedPairIds: new Set(),
@@ -1533,7 +1596,7 @@
         },
 
         startNewRound() {
-          State.round = Deck.createRound();
+          State.round = Deck.createRound(State.roundSource);
           State.resetRoundUi();
           Storage.markRoundSeen(State.round);
           State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
@@ -1939,6 +2002,7 @@
         init() {
           Storage.load();
           Storage.touchSession();
+          State.round = Deck.createRound(State.roundSource);
           Storage.markRoundSeen(State.round);
           State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
           document.addEventListener("click", App.handleTileActivation);
