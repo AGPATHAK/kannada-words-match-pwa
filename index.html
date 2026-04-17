@@ -3,6 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Match beginner-friendly Kannada words with English meanings in a compact review-friendly trainer."
+    />
+    <meta name="theme-color" content="#f5efe4" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Kannada Match" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
     <title>Kannada Words Match</title>
     <style>
       :root {
@@ -448,6 +460,9 @@
         </div>
         <div class="hero-controls">
           <button id="new-round-button" type="button">New Round</button>
+          <button id="reset-progress-button" class="button-secondary" type="button">
+            Reset progress
+          </button>
           <p id="status-message" class="hero-status" role="status" aria-live="polite">
             Tap one Kannada tile and one English tile to make a match.
           </p>
@@ -518,6 +533,7 @@
         incorrectResetDelayMs: 800,
         storageSchemaVersion: 2,
         defaultRoundSource: "smart_mix",
+        serviceWorkerPath: "service-worker.js",
         initialActiveIntroStage: 5,
         stageUnlockMasteredWordsRequired: 6,
         smartMixTargets: {
@@ -2415,6 +2431,22 @@
           );
         },
 
+        clearProgress() {
+          Storage.data = Storage.createDefaultData();
+
+          if (!Storage.isAvailable()) {
+            return;
+          }
+
+          try {
+            window.localStorage.removeItem(AppConfig.storageKeys.meta);
+            window.localStorage.removeItem(AppConfig.storageKeys.stats);
+            window.localStorage.removeItem(AppConfig.storageKeys.settings);
+          } catch (_error) {
+            // Ignore storage availability errors so reset never breaks the app.
+          }
+        },
+
         save() {
           if (!Storage.isAvailable() || !Storage.data) {
             return;
@@ -2492,6 +2524,7 @@
           datasetCount: document.getElementById("dataset-count"),
           statusMessage: document.getElementById("status-message"),
           newRoundButton: document.getElementById("new-round-button"),
+          resetProgressButton: document.getElementById("reset-progress-button"),
           modeButtons: Array.from(document.querySelectorAll(".mode-button")),
           aggregateSummary: document.getElementById("aggregate-summary"),
           masteryLabel: document.getElementById("mastery-label"),
@@ -2871,6 +2904,20 @@
       };
 
       const App = {
+        registerServiceWorker() {
+          if (!("serviceWorker" in navigator)) {
+            return;
+          }
+
+          window.addEventListener("load", () => {
+            navigator.serviceWorker
+              .register(AppConfig.serviceWorkerPath)
+              .catch(() => {
+                // Ignore registration failures so the main app stays usable.
+              });
+          });
+        },
+
         handleTileActivation(event) {
           const tile = event.target.closest(".tile");
 
@@ -2906,6 +2953,22 @@
           Engine.setRoundSource(trigger.dataset.roundSource);
         },
 
+        handleResetProgress() {
+          const shouldReset = window.confirm(
+            "Reset all Kannada Words Match progress on this device and start fresh?"
+          );
+
+          if (!shouldReset) {
+            return;
+          }
+
+          Storage.clearProgress();
+
+          if (typeof window.location !== "undefined" && window.location.reload) {
+            window.location.reload();
+          }
+        },
+
         init() {
           Storage.load();
           Storage.touchSession();
@@ -2918,10 +2981,15 @@
             button.addEventListener("click", App.handleModeChange);
           });
           UI.elements.newRoundButton.addEventListener("click", Engine.startNewRound);
+          UI.elements.resetProgressButton.addEventListener(
+            "click",
+            App.handleResetProgress
+          );
           UI.render();
         }
       };
 
+      App.registerServiceWorker();
       App.init();
     </script>
   </body>
