@@ -1849,24 +1849,31 @@
           };
         },
 
-        getMasterySummary() {
+        isWordMastered(stat) {
           const masteryThreshold = {
             seen: 3,
             directCorrect: 2,
-            incorrect: 1
+            incorrect: 1,
+            bucket: 4
           };
+
+          return (
+            stat &&
+            stat.seen >= masteryThreshold.seen &&
+            stat.direct_correct >= masteryThreshold.directCorrect &&
+            stat.incorrect <= masteryThreshold.incorrect &&
+            stat.bucket >= masteryThreshold.bucket
+          );
+        },
+
+        getMasterySummary() {
           const deckSize = Deck.starterDataset.length;
           const masteredCount = Deck.starterDataset.reduce((count, word) => {
             const stat = Storage.data && Storage.data.stats
               ? Storage.data.stats[word.id]
               : null;
 
-            if (
-              stat &&
-              stat.seen >= masteryThreshold.seen &&
-              stat.direct_correct >= masteryThreshold.directCorrect &&
-              stat.incorrect <= masteryThreshold.incorrect
-            ) {
+            if (UI.isWordMastered(stat)) {
               return count + 1;
             }
 
@@ -1956,15 +1963,15 @@
               value: String(State.sessionSummary.wordsSeen)
             },
             {
-              label: "Direct correct",
+              label: "Direct recalls",
               value: String(State.sessionSummary.directCorrectMatches)
             },
             {
-              label: "Incorrect attempts",
+              label: "Missed attempts",
               value: String(State.sessionSummary.incorrectAttempts)
             },
             {
-              label: "Forced final pairs",
+              label: "Last-pair finishes",
               value: String(State.sessionSummary.forcedCompletions)
             }
           ]);
@@ -1975,19 +1982,19 @@
               value: String(aggregateSummary.totalWordsSeen)
             },
             {
-              label: "Direct correct",
+              label: "Direct recalls",
               value: String(aggregateSummary.totalDirectCorrect)
             },
             {
-              label: "Incorrect attempts",
+              label: "Missed attempts",
               value: String(aggregateSummary.totalIncorrectAttempts)
             },
             {
-              label: "Forced final pairs",
+              label: "Last-pair finishes",
               value: String(aggregateSummary.totalForcedCompletions)
             },
             {
-              label: "Direct accuracy",
+              label: "Direct recall rate",
               value:
                 aggregateSummary.directAccuracy === null
                   ? "—"
