@@ -133,6 +133,7 @@
         display: grid;
         grid-template-columns: 1fr;
         gap: 10px;
+        max-width: 620px;
         margin-top: 12px;
       }
 
@@ -380,10 +381,6 @@
           padding: 14px 18px 16px;
         }
 
-        .summary-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-
         .board-grid {
           grid-template-columns: 1fr 1fr;
           gap: 12px;
@@ -482,12 +479,8 @@
           </button>
         </div>
         <div class="summary-grid" aria-label="Learner summaries">
-          <section class="summary-card" aria-labelledby="session-summary-title">
-            <h2 id="session-summary-title" class="summary-title">This Session</h2>
-            <div id="session-summary" class="summary-list" aria-live="polite"></div>
-          </section>
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
-            <h2 id="aggregate-summary-title" class="summary-title">All Time</h2>
+            <h2 id="aggregate-summary-title" class="summary-title">Progress</h2>
             <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
             <div class="summary-divider" aria-hidden="true"></div>
             <div class="mastery-block" aria-live="polite">
@@ -1706,7 +1699,6 @@
           statusMessage: document.getElementById("status-message"),
           newRoundButton: document.getElementById("new-round-button"),
           modeButtons: Array.from(document.querySelectorAll(".mode-button")),
-          sessionSummary: document.getElementById("session-summary"),
           aggregateSummary: document.getElementById("aggregate-summary"),
           masteryLabel: document.getElementById("mastery-label"),
           masteryFill: document.getElementById("mastery-fill")
@@ -1820,17 +1812,16 @@
 
         getAggregateSummary() {
           const allStats = Object.values(Storage.data ? Storage.data.stats : {});
-          const totalWordsSeen = allStats.reduce((sum, stat) => sum + stat.seen, 0);
+          const uniqueWordsSeen = allStats.reduce(
+            (sum, stat) => sum + (stat.seen > 0 ? 1 : 0),
+            0
+          );
           const totalDirectCorrect = allStats.reduce(
             (sum, stat) => sum + stat.direct_correct,
             0
           );
           const totalIncorrectWordTouches = allStats.reduce(
             (sum, stat) => sum + stat.incorrect,
-            0
-          );
-          const totalForcedCompletions = allStats.reduce(
-            (sum, stat) => sum + stat.forced_completion,
             0
           );
           const totalIncorrectAttempts = Math.floor(totalIncorrectWordTouches / 2);
@@ -1841,10 +1832,9 @@
               : null;
 
           return {
-            totalWordsSeen,
+            uniqueWordsSeen,
             totalDirectCorrect,
             totalIncorrectAttempts,
-            totalForcedCompletions,
             directAccuracy
           };
         },
@@ -1953,48 +1943,20 @@
           const aggregateSummary = UI.getAggregateSummary();
           const masterySummary = UI.getMasterySummary();
 
-          UI.renderSummaryList(UI.elements.sessionSummary, [
-            {
-              label: "Rounds played",
-              value: String(State.sessionSummary.roundsPlayed)
-            },
-            {
-              label: "Words seen",
-              value: String(State.sessionSummary.wordsSeen)
-            },
-            {
-              label: "Direct recalls",
-              value: String(State.sessionSummary.directCorrectMatches)
-            },
-            {
-              label: "Missed attempts",
-              value: String(State.sessionSummary.incorrectAttempts)
-            },
-            {
-              label: "Last-pair finishes",
-              value: String(State.sessionSummary.forcedCompletions)
-            }
-          ]);
-
           UI.renderSummaryList(UI.elements.aggregateSummary, [
             {
-              label: "Words seen",
-              value: String(aggregateSummary.totalWordsSeen)
+              label: "Words explored",
+              value:
+                String(aggregateSummary.uniqueWordsSeen) +
+                " / " +
+                String(masterySummary.deckSize)
             },
             {
-              label: "Direct recalls",
+              label: "Active matches",
               value: String(aggregateSummary.totalDirectCorrect)
             },
             {
-              label: "Missed attempts",
-              value: String(aggregateSummary.totalIncorrectAttempts)
-            },
-            {
-              label: "Last-pair finishes",
-              value: String(aggregateSummary.totalForcedCompletions)
-            },
-            {
-              label: "Direct recall rate",
+              label: "Active match rate",
               value:
                 aggregateSummary.directAccuracy === null
                   ? "—"
