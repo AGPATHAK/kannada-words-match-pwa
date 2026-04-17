@@ -518,6 +518,8 @@
         incorrectResetDelayMs: 800,
         storageSchemaVersion: 2,
         defaultRoundSource: "smart_mix",
+        initialActiveIntroStage: 5,
+        stageUnlockMasteredWordsRequired: 6,
         leitnerBucketCount: 5,
         leitnerPromotionStreak: 2,
         storageKeys: {
@@ -1844,15 +1846,74 @@
           return copy;
         },
 
+        getMaxIntroStage() {
+          return Deck.starterDataset.reduce(
+            (highestStage, word) => Math.max(highestStage, word.intro_stage || 1),
+            1
+          );
+        },
+
+        getStageWords(stage) {
+          return Deck.starterDataset.filter((word) => (word.intro_stage || 1) === stage);
+        },
+
+        getRequiredMasteredCountForStage(stage) {
+          const stageWords = Deck.getStageWords(stage);
+
+          return Math.min(
+            stageWords.length,
+            AppConfig.stageUnlockMasteredWordsRequired
+          );
+        },
+
+        isStageEstablished(stage) {
+          const statsByWordId = Storage.data ? Storage.data.stats : {};
+          const stageWords = Deck.getStageWords(stage);
+          const requiredMasteredCount = Deck.getRequiredMasteredCountForStage(stage);
+          const masteredCount = stageWords.reduce((count, word) => {
+            const stat = statsByWordId[word.id];
+
+            return Storage.isWordMastered(stat) ? count + 1 : count;
+          }, 0);
+
+          return stageWords.length > 0 && masteredCount >= requiredMasteredCount;
+        },
+
+        getHighestActiveIntroStage() {
+          const maxIntroStage = Deck.getMaxIntroStage();
+          let highestActiveStage = Math.min(
+            AppConfig.initialActiveIntroStage,
+            maxIntroStage
+          );
+
+          while (
+            highestActiveStage < maxIntroStage &&
+            Deck.isStageEstablished(highestActiveStage)
+          ) {
+            highestActiveStage += 1;
+          }
+
+          return highestActiveStage;
+        },
+
+        getActiveLearningWords() {
+          const highestActiveStage = Deck.getHighestActiveIntroStage();
+
+          return Deck.starterDataset.filter(
+            (word) => (word.intro_stage || 1) <= highestActiveStage
+          );
+        },
+
         getWordPool(roundSource = AppConfig.defaultRoundSource) {
           const allWords = Deck.starterDataset;
+          const activeWords = Deck.getActiveLearningWords();
           const statsByWordId = Storage.data ? Storage.data.stats : {};
 
-          const unseenWords = allWords.filter((word) => {
+          const unseenWords = activeWords.filter((word) => {
             const stat = statsByWordId[word.id];
             return !stat || stat.seen === 0;
           });
-          const reviewReadyWords = allWords.filter((word) => {
+          const reviewReadyWords = activeWords.filter((word) => {
             const stat = statsByWordId[word.id];
 
             return (
@@ -1861,11 +1922,11 @@
               (stat.incorrect > 0 || stat.direct_correct < 2)
             );
           });
-          const mistakesWords = allWords.filter((word) => {
+          const mistakesWords = activeWords.filter((word) => {
             const stat = statsByWordId[word.id];
             return stat && stat.incorrect > 0;
           });
-          const weakWords = allWords.filter((word) => {
+          const weakWords = activeWords.filter((word) => {
             const stat = statsByWordId[word.id];
 
             return (
@@ -1881,7 +1942,7 @@
             Array.from(new Map(words.map((word) => [word.id, word])).values());
 
           const poolMap = {
-            full_deck: allWords,
+            full_deck: activeWords,
             unseen: unseenWords,
             review_ready: reviewReadyWords,
             mistakes: mistakesWords,
@@ -1900,13 +1961,17 @@
             return selectedPool;
           }
 
-          const fallbackPool = uniqueById([...selectedPool, ...allWords]);
+          const fallbackPool = uniqueById([
+            ...selectedPool,
+            ...poolMap.smart_mix,
+            ...activeWords
+          ]);
 
           if (fallbackPool.length >= AppConfig.roundSize) {
             return fallbackPool;
           }
 
-          return allWords;
+          return activeWords.length > 0 ? activeWords : allWords;
         },
 
         createRoundFromPool(pool) {
@@ -2271,6 +2336,23 @@
           Storage.save();
         },
 
+        isWordMastered(stat) {
+          const masteryThreshold = {
+            seen: 3,
+            directCorrect: 2,
+            incorrect: 1,
+            bucket: 4
+          };
+
+          return (
+            stat &&
+            stat.seen >= masteryThreshold.seen &&
+            stat.direct_correct >= masteryThreshold.directCorrect &&
+            stat.incorrect <= masteryThreshold.incorrect &&
+            stat.bucket >= masteryThreshold.bucket
+          );
+        },
+
         save() {
           if (!Storage.isAvailable() || !Storage.data) {
             return;
@@ -2506,6 +2588,19 @@
           );
         },
 
+        getStageIntroductionSummary() {
+          const highestActiveStage = Deck.getHighestActiveIntroStage();
+          const maxIntroStage = Deck.getMaxIntroStage();
+          const activeStageLabel =
+            highestActiveStage <= 1 ? "1" : "1-" + String(highestActiveStage);
+
+          return {
+            highestActiveStage,
+            maxIntroStage,
+            activeStageLabel
+          };
+        },
+
         getMasterySummary() {
           const deckSize = Deck.starterDataset.length;
           const masteredCount = Deck.starterDataset.reduce((count, word) => {
@@ -2591,9 +2686,14 @@
           });
 
           const aggregateSummary = UI.getAggregateSummary();
+          const stageIntroductionSummary = UI.getStageIntroductionSummary();
           const masterySummary = UI.getMasterySummary();
 
           UI.renderSummaryList(UI.elements.aggregateSummary, [
+            {
+              label: "Active stages",
+              value: stageIntroductionSummary.activeStageLabel
+            },
             {
               label: "Words explored",
               value:
