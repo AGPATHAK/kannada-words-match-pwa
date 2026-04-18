@@ -2658,7 +2658,13 @@
 
         getAggregateSummary() {
           const allStats = Object.values(Storage.data ? Storage.data.stats : {});
-          const uniqueWordsSeen = allStats.reduce(
+          const activeWords = Deck.getActiveLearningWords();
+          const activeStats = activeWords
+            .map((word) => (Storage.data && Storage.data.stats
+              ? Storage.data.stats[word.id]
+              : null))
+            .filter(Boolean);
+          const uniqueWordsSeen = activeStats.reduce(
             (sum, stat) => sum + (stat.seen > 0 ? 1 : 0),
             0
           );
@@ -2685,23 +2691,6 @@
           };
         },
 
-        isWordMastered(stat) {
-          const masteryThreshold = {
-            seen: 3,
-            directCorrect: 2,
-            incorrect: 1,
-            bucket: 4
-          };
-
-          return (
-            stat &&
-            stat.seen >= masteryThreshold.seen &&
-            stat.direct_correct >= masteryThreshold.directCorrect &&
-            stat.incorrect <= masteryThreshold.incorrect &&
-            stat.bucket >= masteryThreshold.bucket
-          );
-        },
-
         getStageIntroductionSummary() {
           const highestActiveStage = Deck.getHighestActiveIntroStage();
           const maxIntroStage = Deck.getMaxIntroStage();
@@ -2716,13 +2705,14 @@
         },
 
         getMasterySummary() {
-          const deckSize = Deck.curatedDeck.length;
-          const masteredCount = Deck.curatedDeck.reduce((count, word) => {
+          const activeWords = Deck.getActiveLearningWords();
+          const deckSize = activeWords.length;
+          const masteredCount = activeWords.reduce((count, word) => {
             const stat = Storage.data && Storage.data.stats
               ? Storage.data.stats[word.id]
               : null;
 
-            if (UI.isWordMastered(stat)) {
+            if (Storage.isWordMastered(stat)) {
               return count + 1;
             }
 
@@ -2833,7 +2823,7 @@
             masterySummary.masteredCount +
             " / " +
             masterySummary.deckSize +
-            " words mastered";
+            " active words mastered";
           UI.elements.masteryFill.style.width = masterySummary.percent + "%";
         }
       };
