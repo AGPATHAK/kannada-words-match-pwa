@@ -2,7 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f3f6fb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Kannada Match" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -35,6 +41,7 @@
 
       * {
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
       }
 
       body {
@@ -49,7 +56,11 @@
       .app {
         width: min(100%, 1080px);
         margin: 0 auto;
-        padding: 18px 14px 22px;
+        padding:
+          calc(14px + env(safe-area-inset-top))
+          calc(12px + env(safe-area-inset-right))
+          calc(16px + env(safe-area-inset-bottom))
+          calc(12px + env(safe-area-inset-left));
       }
 
       .hero,
@@ -213,7 +224,7 @@
 
       .board-grid {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 14px;
       }
 
@@ -246,6 +257,9 @@
         border: 1px solid var(--border);
         background: var(--panel-strong);
         cursor: pointer;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
         transition:
           transform 160ms ease,
           border-color 160ms ease,
@@ -314,7 +328,7 @@
         border: 1px solid var(--accent);
         border-radius: 10px;
         padding: 9px 14px;
-        min-height: 38px;
+        min-height: 42px;
         font: inherit;
         font-weight: 600;
         letter-spacing: -0.01em;
@@ -322,6 +336,9 @@
         background: var(--accent);
         cursor: pointer;
         opacity: 1;
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: manipulation;
         transition:
           transform 160ms ease,
           opacity 160ms ease,
@@ -374,12 +391,11 @@
 
       @media (min-width: 760px) {
         .app {
-          padding: 16px 18px 18px;
-        }
-
-        .board-grid {
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
+          padding:
+            calc(16px + env(safe-area-inset-top))
+            calc(18px + env(safe-area-inset-right))
+            calc(18px + env(safe-area-inset-bottom))
+            calc(18px + env(safe-area-inset-left));
         }
 
         .hero {
@@ -411,10 +427,21 @@
       }
 
       @media (max-width: 759px) {
-        .hero-header,
+        .app {
+          padding:
+            calc(10px + env(safe-area-inset-top))
+            calc(10px + env(safe-area-inset-right))
+            calc(14px + env(safe-area-inset-bottom))
+            calc(10px + env(safe-area-inset-left));
+        }
+
         .hero-controls {
           align-items: flex-start;
           flex-direction: column;
+        }
+
+        .hero-header {
+          gap: 10px;
         }
 
         .hero-controls {
@@ -449,6 +476,29 @@
 
         .secondary-controls {
           width: 100%;
+        }
+
+        .board-grid {
+          gap: 8px;
+        }
+
+        .board {
+          padding: 10px;
+        }
+
+        .tile {
+          padding: 9px 10px;
+        }
+
+        .tile-label {
+          font-size: 1rem;
+          line-height: 1.16;
+        }
+
+        .tile-support {
+          margin-top: 3px;
+          font-size: 0.8rem;
+          line-height: 1.28;
         }
       }
     </style>
