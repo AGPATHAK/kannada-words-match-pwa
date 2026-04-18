@@ -118,19 +118,25 @@
         display: inline-flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 10px;
         padding: 0;
         border: 0;
         border-radius: 0;
         background: transparent;
       }
 
+      .controls-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        margin-top: 10px;
+      }
+
       .secondary-controls {
         display: flex;
-        justify-content: flex-end;
         flex-wrap: wrap;
         gap: 8px;
-        margin-top: 10px;
       }
 
       .mode-button {
@@ -424,6 +430,11 @@
           justify-content: flex-start;
         }
 
+        .controls-row {
+          align-items: flex-start;
+          gap: 8px;
+        }
+
         .mode-row {
           width: 100%;
           margin-top: 8px;
@@ -434,6 +445,10 @@
           flex: 1 1 calc(50% - 6px);
           justify-content: center;
           text-align: center;
+        }
+
+        .secondary-controls {
+          width: 100%;
         }
       }
     </style>
@@ -453,39 +468,41 @@
             Tap one Kannada tile and one English tile to make a match.
           </p>
         </div>
-        <div class="mode-row" aria-label="Practice mode">
-          <button
-            id="mode-smart-mix"
-            class="mode-button"
-            type="button"
-            data-round-source="smart_mix"
-          >
-            Mixed Practice
-          </button>
-          <button
-            id="mode-mistakes"
-            class="mode-button"
-            type="button"
-            data-round-source="mistakes"
-          >
-            Recent Mistakes
-          </button>
-          <button
-            id="mode-weak-words"
-            class="mode-button"
-            type="button"
-            data-round-source="weak_words"
-          >
-            Weak Words
-          </button>
-        </div>
-        <div class="secondary-controls">
-          <button id="devanagari-toggle-button" class="button-subtle" type="button">
-            Hide Devanagari
-          </button>
-          <button id="reset-progress-button" class="button-subtle" type="button">
-            Reset progress
-          </button>
+        <div class="controls-row">
+          <div class="mode-row" aria-label="Practice mode">
+            <button
+              id="mode-smart-mix"
+              class="mode-button"
+              type="button"
+              data-round-source="smart_mix"
+            >
+              Mixed Practice
+            </button>
+            <button
+              id="mode-mistakes"
+              class="mode-button"
+              type="button"
+              data-round-source="mistakes"
+            >
+              Recent Mistakes
+            </button>
+            <button
+              id="mode-weak-words"
+              class="mode-button"
+              type="button"
+              data-round-source="weak_words"
+            >
+              Weak Words
+            </button>
+          </div>
+          <div class="secondary-controls">
+            <button id="devanagari-toggle-button" class="button-subtle" type="button">
+              Hide Devanagari
+            </button>
+            <button id="reset-progress-button" class="button-subtle" type="button">
+              Reset progress
+            </button>
+          </div>
         </div>
         <div class="summary-grid" aria-label="Learner summaries">
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
