@@ -167,6 +167,12 @@
         gap: 5px;
       }
 
+      .summary-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+      }
+
       .summary-row {
         display: flex;
         justify-content: space-between;
@@ -441,9 +447,6 @@
         <div class="hero-controls">
           <div class="hero-actions">
             <button id="new-round-button" type="button">New Round</button>
-            <button id="reset-progress-button" class="button-subtle" type="button">
-              Reset progress
-            </button>
           </div>
           <p id="status-message" class="hero-status" role="status" aria-live="polite">
             Tap one Kannada tile and one English tile to make a match.
@@ -479,6 +482,11 @@
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
             <h2 id="aggregate-summary-title" class="summary-title">Learning Snapshot</h2>
             <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
+            <div class="summary-actions">
+              <button id="reset-progress-button" class="button-subtle" type="button">
+                Reset progress
+              </button>
+            </div>
           </section>
         </div>
       </section>
@@ -2486,8 +2494,6 @@
         startNewRound() {
           State.round = Deck.createRound(State.roundSource);
           State.resetRoundUi();
-          Storage.markRoundSeen(State.round);
-          State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
         }
       };
 
@@ -2790,6 +2796,8 @@
             State.isRoundComplete =
               State.matchedPairIds.size === AppConfig.roundSize;
             if (State.isRoundComplete) {
+              Storage.markRoundSeen(State.round);
+              State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
               State.sessionSummary.roundsPlayed += 1;
             }
             UI.render();
@@ -2913,8 +2921,6 @@
             incorrectAttempts: 0,
             forcedCompletions: 0
           };
-          Storage.markRoundSeen(State.round);
-          State.sessionSummary.wordsSeen += State.round.kannadaPairs.length;
 
           if (!App.didInit) {
             document.addEventListener("click", App.handleTileActivation);
