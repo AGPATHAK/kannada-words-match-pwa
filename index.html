@@ -49,10 +49,14 @@
       .app {
         width: min(100%, 1080px);
         margin: 0 auto;
-        padding: 18px 14px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 12px 16px;
       }
 
       .hero,
+      .summary-card,
       .board {
         background: var(--panel);
         border: 1px solid var(--border);
@@ -61,7 +65,7 @@
       }
 
       .hero {
-        padding: 14px 16px 15px;
+        padding: 12px 14px;
       }
 
       .hero-header {
@@ -95,8 +99,8 @@
         display: flex;
         align-items: center;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 12px;
+        gap: 8px;
+        margin-top: 10px;
       }
 
       .hero-actions {
@@ -110,15 +114,16 @@
         min-width: 0;
         flex: 1 1 280px;
         color: var(--muted);
-        font-size: 0.9rem;
-        line-height: 1.4;
+        font-size: 0.87rem;
+        line-height: 1.32;
       }
 
       .mode-row {
-        display: inline-flex;
-        flex-wrap: wrap;
+        display: inline-grid;
+        grid-template-columns: repeat(3, minmax(0, max-content));
         gap: 6px;
-        margin-top: 10px;
+        align-self: start;
+        margin-top: 8px;
         padding: 0;
         border: 0;
         border-radius: 0;
@@ -126,17 +131,18 @@
       }
 
       .display-row {
-        margin-top: 10px;
+        margin-top: 0;
       }
 
       .mode-button {
-        min-height: 34px;
-        padding: 7px 12px;
+        min-height: 32px;
+        padding: 6px 11px;
         border-color: var(--border-strong);
         color: var(--muted);
         background: #ffffff;
         box-shadow: none;
         white-space: nowrap;
+        font-size: 0.86rem;
       }
 
       .mode-button:hover {
@@ -158,12 +164,11 @@
         grid-template-columns: 1fr;
         gap: 10px;
         max-width: 620px;
-        margin-top: 12px;
+        order: 2;
       }
 
       .summary-card {
         padding: 11px 12px;
-        border: 1px solid var(--border);
         border-radius: 14px;
         background: #ffffff;
       }
@@ -203,8 +208,8 @@
       }
 
       .board {
-        margin-top: 12px;
         padding: 13px;
+        order: 3;
       }
 
       .board-grid {
@@ -309,8 +314,8 @@
         appearance: none;
         border: 1px solid var(--accent);
         border-radius: 10px;
-        padding: 9px 14px;
-        min-height: 38px;
+        padding: 8px 13px;
+        min-height: 36px;
         font: inherit;
         font-weight: 600;
         letter-spacing: -0.01em;
@@ -370,12 +375,25 @@
 
       @media (min-width: 760px) {
         .app {
+          gap: 12px;
           padding: 16px 18px 18px;
+        }
+
+        .hero {
+          order: 1;
+        }
+
+        .summary-grid {
+          order: 2;
         }
 
         .board-grid {
           grid-template-columns: 1fr 1fr;
           gap: 12px;
+        }
+
+        .board {
+          order: 3;
         }
 
         .hero {
@@ -407,31 +425,65 @@
       }
 
       @media (max-width: 759px) {
-        .hero-header,
-        .hero-controls {
-          align-items: flex-start;
-          flex-direction: column;
+        .app {
+          gap: 8px;
+          padding: 10px 10px 14px;
+        }
+
+        .hero {
+          order: 1;
+          padding: 10px 12px;
+        }
+
+        .hero-header {
+          align-items: center;
+        }
+
+        h1 {
+          font-size: clamp(1.45rem, 8vw, 1.85rem);
+        }
+
+        .progress-count {
+          padding: 5px 8px;
+          font-size: 0.79rem;
         }
 
         .hero-controls {
-          gap: 10px;
+          align-items: center;
+          gap: 6px 8px;
+          margin-top: 8px;
         }
 
         .hero-actions {
-          width: 100%;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         }
 
         .mode-row {
           width: 100%;
-          margin-top: 8px;
-          border-radius: 18px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 5px;
+          margin-top: 6px;
         }
 
         .mode-button {
-          flex: 1 1 calc(50% - 6px);
-          justify-content: center;
+          width: 100%;
+          padding: 6px 8px;
+          font-size: 0.79rem;
           text-align: center;
+        }
+
+        .display-row {
+          margin-top: 6px;
+        }
+
+        .summary-grid {
+          order: 3;
+          max-width: none;
+        }
+
+        .board {
+          order: 2;
+          padding: 11px;
         }
       }
     </style>
@@ -446,6 +498,9 @@
         <div class="hero-controls">
           <div class="hero-actions">
             <button id="new-round-button" type="button">New Round</button>
+            <button id="reset-progress-button" class="button-subtle" type="button">
+              Reset progress
+            </button>
           </div>
           <p id="status-message" class="hero-status" role="status" aria-live="polite">
             Tap one Kannada tile and one English tile to make a match.
@@ -482,17 +537,6 @@
             Hide Devanagari
           </button>
         </div>
-        <div class="summary-grid" aria-label="Learner summaries">
-          <section class="summary-card" aria-labelledby="aggregate-summary-title">
-            <h2 id="aggregate-summary-title" class="summary-title">Learning Snapshot</h2>
-            <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
-            <div class="summary-actions">
-              <button id="reset-progress-button" class="button-subtle" type="button">
-                Reset progress
-              </button>
-            </div>
-          </section>
-        </div>
       </section>
 
       <section class="board" aria-label="Word matching board">
@@ -512,6 +556,12 @@
           </section>
         </div>
       </section>
+      <div class="summary-grid" aria-label="Learner summaries">
+        <section class="summary-card" aria-labelledby="aggregate-summary-title">
+          <h2 id="aggregate-summary-title" class="summary-title">Learning Snapshot</h2>
+          <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
+        </section>
+      </div>
     </main>
 
     <script>
