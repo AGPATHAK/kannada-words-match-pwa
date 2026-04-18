@@ -125,7 +125,11 @@
         background: transparent;
       }
 
-      .display-row {
+      .secondary-controls {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
         margin-top: 10px;
       }
 
@@ -180,12 +184,6 @@
       .summary-list {
         display: grid;
         gap: 5px;
-      }
-
-      .summary-actions {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 10px;
       }
 
       .summary-row {
@@ -422,6 +420,10 @@
           flex-wrap: wrap;
         }
 
+        .secondary-controls {
+          justify-content: flex-start;
+        }
+
         .mode-row {
           width: 100%;
           margin-top: 8px;
@@ -477,20 +479,18 @@
             Weak Words
           </button>
         </div>
-        <div class="display-row">
+        <div class="secondary-controls">
           <button id="devanagari-toggle-button" class="button-subtle" type="button">
             Hide Devanagari
+          </button>
+          <button id="reset-progress-button" class="button-subtle" type="button">
+            Reset progress
           </button>
         </div>
         <div class="summary-grid" aria-label="Learner summaries">
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
             <h2 id="aggregate-summary-title" class="summary-title">Learning Snapshot</h2>
             <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
-            <div class="summary-actions">
-              <button id="reset-progress-button" class="button-subtle" type="button">
-                Reset progress
-              </button>
-            </div>
           </section>
         </div>
       </section>
