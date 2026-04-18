@@ -167,12 +167,6 @@
         gap: 5px;
       }
 
-      .summary-divider {
-        height: 1px;
-        margin: 10px 0;
-        background: rgba(191, 164, 111, 0.26);
-      }
-
       .summary-row {
         display: flex;
         justify-content: space-between;
@@ -185,38 +179,6 @@
       .summary-row strong {
         color: var(--text);
         font-weight: 700;
-      }
-
-      .mastery-block {
-        display: grid;
-        gap: 7px;
-      }
-
-      .mastery-label {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.88rem;
-        line-height: 1.25;
-      }
-
-      .mastery-label strong {
-        color: var(--text);
-        font-weight: 700;
-      }
-
-      .mastery-bar {
-        overflow: hidden;
-        height: 8px;
-        border-radius: 999px;
-        background: rgba(191, 164, 111, 0.22);
-      }
-
-      .mastery-fill {
-        height: 100%;
-        width: 0%;
-        border-radius: inherit;
-        background: linear-gradient(90deg, #c38a4f 0%, #7ead76 100%);
-        transition: width 180ms ease;
       }
 
       .board {
@@ -515,15 +477,8 @@
         </div>
         <div class="summary-grid" aria-label="Learner summaries">
           <section class="summary-card" aria-labelledby="aggregate-summary-title">
-            <h2 id="aggregate-summary-title" class="summary-title">Learning Progress</h2>
+            <h2 id="aggregate-summary-title" class="summary-title">Learning Snapshot</h2>
             <div id="aggregate-summary" class="summary-list" aria-live="polite"></div>
-            <div class="summary-divider" aria-hidden="true"></div>
-            <div class="mastery-block" aria-live="polite">
-              <p id="mastery-label" class="mastery-label"></p>
-              <div class="mastery-bar" aria-hidden="true">
-                <div id="mastery-fill" class="mastery-fill"></div>
-              </div>
-            </div>
           </section>
         </div>
       </section>
@@ -2545,9 +2500,7 @@
           newRoundButton: document.getElementById("new-round-button"),
           resetProgressButton: document.getElementById("reset-progress-button"),
           modeButtons: Array.from(document.querySelectorAll(".mode-button")),
-          aggregateSummary: document.getElementById("aggregate-summary"),
-          masteryLabel: document.getElementById("mastery-label"),
-          masteryFill: document.getElementById("mastery-fill")
+          aggregateSummary: document.getElementById("aggregate-summary")
         },
 
         createTile(content) {
@@ -2658,13 +2611,7 @@
 
         getAggregateSummary() {
           const allStats = Object.values(Storage.data ? Storage.data.stats : {});
-          const activeWords = Deck.getActiveLearningWords();
-          const activeStats = activeWords
-            .map((word) => (Storage.data && Storage.data.stats
-              ? Storage.data.stats[word.id]
-              : null))
-            .filter(Boolean);
-          const uniqueWordsSeen = activeStats.reduce(
+          const uniqueWordsSeen = allStats.reduce(
             (sum, stat) => sum + (stat.seen > 0 ? 1 : 0),
             0
           );
@@ -2682,48 +2629,50 @@
             directAttemptBase > 0
               ? Math.round((totalDirectCorrect / directAttemptBase) * 100)
               : null;
+          const wordsById = new Map(
+            Deck.curatedDeck.map((word, index) => [word.id, { ...word, index }])
+          );
+          const focusWords = Object.entries(Storage.data ? Storage.data.stats : {})
+            .filter(([, stat]) => stat && stat.incorrect > 0)
+            .sort((left, right) => {
+              const [leftId, leftStat] = left;
+              const [rightId, rightStat] = right;
+
+              if (rightStat.incorrect !== leftStat.incorrect) {
+                return rightStat.incorrect - leftStat.incorrect;
+              }
+
+              const leftTime = leftStat.last_incorrect_at
+                ? Date.parse(leftStat.last_incorrect_at)
+                : 0;
+              const rightTime = rightStat.last_incorrect_at
+                ? Date.parse(rightStat.last_incorrect_at)
+                : 0;
+
+              if (rightTime !== leftTime) {
+                return rightTime - leftTime;
+              }
+
+              const leftIndex = wordsById.has(leftId) ? wordsById.get(leftId).index : Infinity;
+              const rightIndex = wordsById.has(rightId)
+                ? wordsById.get(rightId).index
+                : Infinity;
+
+              if (leftIndex !== rightIndex) {
+                return leftIndex - rightIndex;
+              }
+
+              return leftId.localeCompare(rightId);
+            })
+            .slice(0, 3)
+            .map(([wordId]) => (wordsById.has(wordId) ? wordsById.get(wordId).kannada : wordId));
 
           return {
             uniqueWordsSeen,
             totalDirectCorrect,
             totalIncorrectAttempts,
-            directAccuracy
-          };
-        },
-
-        getStageIntroductionSummary() {
-          const highestActiveStage = Deck.getHighestActiveIntroStage();
-          const maxIntroStage = Deck.getMaxIntroStage();
-          const activeStageLabel =
-            highestActiveStage <= 1 ? "1" : "1-" + String(highestActiveStage);
-
-          return {
-            highestActiveStage,
-            maxIntroStage,
-            activeStageLabel
-          };
-        },
-
-        getMasterySummary() {
-          const activeWords = Deck.getActiveLearningWords();
-          const deckSize = activeWords.length;
-          const masteredCount = activeWords.reduce((count, word) => {
-            const stat = Storage.data && Storage.data.stats
-              ? Storage.data.stats[word.id]
-              : null;
-
-            if (Storage.isWordMastered(stat)) {
-              return count + 1;
-            }
-
-            return count;
-          }, 0);
-          const percent = deckSize > 0 ? Math.round((masteredCount / deckSize) * 100) : 0;
-
-          return {
-            masteredCount,
-            deckSize,
-            percent
+            directAccuracy,
+            focusWords
           };
         },
 
@@ -2790,41 +2739,30 @@
           });
 
           const aggregateSummary = UI.getAggregateSummary();
-          const stageIntroductionSummary = UI.getStageIntroductionSummary();
-          const masterySummary = UI.getMasterySummary();
 
           UI.renderSummaryList(UI.elements.aggregateSummary, [
             {
-              label: "Stages active",
-              value: stageIntroductionSummary.activeStageLabel
-            },
-            {
-              label: "Words seen",
+              label: "Words attempted",
               value:
                 String(aggregateSummary.uniqueWordsSeen) +
                 " / " +
-                String(masterySummary.deckSize)
+                String(Deck.curatedDeck.length)
             },
             {
-              label: "Direct recalls",
-              value: String(aggregateSummary.totalDirectCorrect)
-            },
-            {
-              label: "Recall rate",
+              label: "Accuracy",
               value:
                 aggregateSummary.directAccuracy === null
                   ? "—"
                   : aggregateSummary.directAccuracy + "%"
+            },
+            {
+              label: "Focus words",
+              value:
+                aggregateSummary.focusWords.length > 0
+                  ? aggregateSummary.focusWords.join(", ")
+                  : "—"
             }
           ]);
-
-          UI.elements.masteryLabel.innerHTML =
-            "<strong>Mastery</strong> " +
-            masterySummary.masteredCount +
-            " / " +
-            masterySummary.deckSize +
-            " active words mastered";
-          UI.elements.masteryFill.style.width = masterySummary.percent + "%";
         }
       };
 
