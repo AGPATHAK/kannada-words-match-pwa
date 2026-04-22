@@ -118,6 +118,7 @@
       }
 
       .hero-status {
+        margin: 0;
         min-width: 0;
         flex: 1 1 280px;
         color: var(--muted);
@@ -453,6 +454,10 @@
           flex-wrap: wrap;
         }
 
+        .hero-status {
+          flex: 0 1 auto;
+        }
+
         .secondary-controls {
           justify-content: flex-start;
         }
@@ -465,12 +470,18 @@
         .mode-row {
           width: 100%;
           margin-top: 8px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           border-radius: 18px;
         }
 
         .mode-button {
-          flex: 1 1 calc(50% - 6px);
+          width: 100%;
+          min-width: 0;
+          padding-right: 6px;
+          padding-left: 6px;
           justify-content: center;
+          font-size: 0.78rem;
           text-align: center;
         }
 
@@ -589,6 +600,7 @@
         defaultRoundSource: "smart_mix",
         initialActiveIntroStage: 5,
         stageUnlockMasteredWordsRequired: 6,
+        stageUnlockSeenWordsRequired: 8,
         smartMixTargets: {
           reviewReady: 2,
           weakWords: 2,
@@ -1944,13 +1956,26 @@
           const statsByWordId = Storage.data ? Storage.data.stats : {};
           const stageWords = Deck.getStageWords(stage);
           const requiredMasteredCount = Deck.getRequiredMasteredCountForStage(stage);
+          const requiredSeenCount = Math.min(
+            stageWords.length,
+            AppConfig.stageUnlockSeenWordsRequired
+          );
           const masteredCount = stageWords.reduce((count, word) => {
             const stat = statsByWordId[word.id];
 
             return Storage.isWordMastered(stat) ? count + 1 : count;
           }, 0);
+          const seenCount = stageWords.reduce((count, word) => {
+            const stat = statsByWordId[word.id];
 
-          return stageWords.length > 0 && masteredCount >= requiredMasteredCount;
+            return stat && stat.seen > 0 ? count + 1 : count;
+          }, 0);
+
+          return (
+            stageWords.length > 0 &&
+            (masteredCount >= requiredMasteredCount ||
+              seenCount >= requiredSeenCount)
+          );
         },
 
         getHighestActiveIntroStage() {
