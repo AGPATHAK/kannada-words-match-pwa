@@ -31,7 +31,7 @@ Kannada Words Match PWA is a lightweight single-file trainer for beginner Kannad
 ## Run Locally
 
 1. Clone or download this repository.
-2. Open [index.html](/Users/ardhendupathak/Documents/GitHub/kannada-words-match-pwa/index.html) in a browser.
+2. Open [[index.html](/Users/ardhendupathak/Documents/GitHub/kannada-words-match-pwa/index.html) ](https://agpathak.github.io/kannada-words-match-pwa/) in a browser.
 
 No build step, package install, or local server is required for the current prototype.
 
